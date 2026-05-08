@@ -40,7 +40,9 @@ export async function addPayslip(data) {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     const cached = raw ? JSON.parse(raw) : [];
-    cached.push(data);
+    const idx = cached.findIndex((p) => p.year === data.year && p.month === data.month);
+    if (idx >= 0) cached[idx] = data;
+    else cached.push(data);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(cached));
   } catch {}
   return new Payslip(data);

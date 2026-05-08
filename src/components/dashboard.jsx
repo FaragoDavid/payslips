@@ -59,7 +59,10 @@ export default function Dashboard() {
 
   const handleAddPayslip = async (data) => {
     const newPayslip = await addPayslip(data);
-    setPayslips((prev) => [...prev, newPayslip].sort((a, b) => a.year - b.year || a.month - b.month));
+    setPayslips((prev) => {
+      const filtered = prev.filter((p) => p.year !== data.year || p.month !== data.month);
+      return [...filtered, newPayslip].sort((a, b) => a.year - b.year || a.month - b.month);
+    });
     setShowForm(false);
   };
 
