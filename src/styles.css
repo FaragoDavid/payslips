@@ -383,8 +383,9 @@ tbody td:last-child {
 
 .add-payslip-form {
   text-align: left;
-  max-height: 70vh;
   overflow-y: auto;
+  flex: 1;
+  min-height: 0;
   padding: 8px;
 }
 
@@ -405,6 +406,9 @@ tbody td:last-child {
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
   width: 90%;
   max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
 }
 
 .add-payslip-form fieldset {
@@ -459,6 +463,13 @@ tbody td:last-child {
   gap: 8px;
   justify-content: flex-end;
   margin-top: 12px;
+  flex-shrink: 0;
+}
+
+.form-actions .btn-small {
+  background: linear-gradient(135deg, #2d3561 0%, #1e6b4e 100%);
+  border-color: transparent;
+  color: white;
 }
 
 .btn-cancel {

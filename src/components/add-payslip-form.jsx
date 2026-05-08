@@ -28,64 +28,66 @@ export default function AddPayslipForm({ onSave, onCancel }) {
   };
 
   return (
-    <form className="add-payslip-form" onSubmit={handleSubmit}>
-      <div className="form-row">
-        <label>{strings.addForm.year}</label>
-        <input type="number" value={year} onChange={(e) => setYear(Number(e.target.value))} required />
-      </div>
-      <div className="form-row">
-        <label>{strings.addForm.month}</label>
-        <select value={month} onChange={(e) => setMonth(Number(e.target.value))}>
-          {strings.months.map((name, i) => (
-            <option key={i + 1} value={i + 1}>
-              {name}
-            </option>
-          ))}
-        </select>
-      </div>
-      {Payslip.categories.map((category) => (
-        <fieldset key={category.key}>
-          <legend>{strings.categories[category.key]}</legend>
-          {category.groups
-            ? category.groups.map((group) => (
-                <div key={group.key} className="form-group">
-                  <div className="form-group-label">{strings.groups[group.key]}</div>
-                  {group.fields.map((field) => (
-                    <div className="form-row" key={field}>
-                      <label>{strings.fields[field]}</label>
-                      <input
-                        type="number"
-                        step="any"
-                        value={fields[field]}
-                        onChange={(e) => handleFieldChange(field, e.target.value)}
-                        placeholder="0"
-                      />
-                    </div>
-                  ))}
-                </div>
-              ))
-            : category.fields.map((field) => (
-                <div className="form-row" key={field}>
-                  <label>{strings.fields[field]}</label>
-                  <input
-                    type="number"
-                    step="any"
-                    value={fields[field]}
-                    onChange={(e) => handleFieldChange(field, e.target.value)}
-                    placeholder="0"
-                  />
-                </div>
-              ))}
-        </fieldset>
-      ))}
+    <>
+      <form id="add-payslip-form" className="add-payslip-form" onSubmit={handleSubmit}>
+        <div className="form-row">
+          <label>{strings.addForm.year}</label>
+          <input type="number" value={year} onChange={(e) => setYear(Number(e.target.value))} required />
+        </div>
+        <div className="form-row">
+          <label>{strings.addForm.month}</label>
+          <select value={month} onChange={(e) => setMonth(Number(e.target.value))}>
+            {strings.months.map((name, i) => (
+              <option key={i + 1} value={i + 1}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </div>
+        {Payslip.categories.map((category) => (
+          <fieldset key={category.key}>
+            <legend>{strings.categories[category.key]}</legend>
+            {category.groups
+              ? category.groups.map((group) => (
+                  <div key={group.key} className="form-group">
+                    <div className="form-group-label">{strings.groups[group.key]}</div>
+                    {group.fields.map((field) => (
+                      <div className="form-row" key={field}>
+                        <label>{strings.fields[field]}</label>
+                        <input
+                          type="number"
+                          step="any"
+                          value={fields[field]}
+                          onChange={(e) => handleFieldChange(field, e.target.value)}
+                          placeholder="0"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ))
+              : category.fields.map((field) => (
+                  <div className="form-row" key={field}>
+                    <label>{strings.fields[field]}</label>
+                    <input
+                      type="number"
+                      step="any"
+                      value={fields[field]}
+                      onChange={(e) => handleFieldChange(field, e.target.value)}
+                      placeholder="0"
+                    />
+                  </div>
+                ))}
+          </fieldset>
+        ))}
+      </form>
       <div className="form-actions">
-        <button type="submit" className="btn btn-small">
+        <button type="submit" form="add-payslip-form" className="btn btn-small">
           {strings.addForm.save}
         </button>
         <button type="button" className="btn btn-small btn-cancel" onClick={onCancel}>
           {strings.addForm.cancel}
         </button>
       </div>
-    </form>
+    </>
   );
 }
