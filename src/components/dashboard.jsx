@@ -7,6 +7,7 @@ import CategoryChart from './charts/category-chart.jsx';
 import YearlyTable from './tables/yearly-table.jsx';
 import MonthlyTrendChart from './charts/monthly-trend-chart.jsx';
 import YearlyBarChart from './charts/yearly-bar-chart.jsx';
+import { Plus, RefreshCw, LogOut } from 'lucide-react';
 import AddPayslipForm from './add-payslip-form.jsx';
 
 const VIEW_KEY = 'payslips_view';
@@ -90,13 +91,16 @@ export default function Dashboard() {
         </div>
         <div className="header-actions">
           <button className="btn btn-small" onClick={() => setShowForm(true)} disabled={showForm}>
-            {strings.addForm.addButton}
+            <Plus className="btn-icon" size={18} />
+            <span className="btn-label">{strings.addForm.addButton}</span>
           </button>
           <button className="btn btn-small btn-refresh" onClick={handleRefresh} disabled={loading}>
-            {loading ? strings.dashboard.loading : strings.dashboard.refreshButton}
+            <RefreshCw className="btn-icon" size={18} />
+            <span className="btn-label">{loading ? strings.dashboard.loading : strings.dashboard.refreshButton}</span>
           </button>
           <button className="btn btn-small" onClick={handleSignOut}>
-            {strings.dashboard.signOut}
+            <LogOut className="btn-icon" size={18} />
+            <span className="btn-label">{strings.dashboard.signOut}</span>
           </button>
         </div>
       </div>

@@ -168,12 +168,22 @@ p {
   gap: 0;
 }
 
+.btn-icon {
+  display: none;
+}
+
 @media (max-width: 600px) {
   .view-toggle {
     display: none;
   }
   .view-select {
     display: block;
+  }
+  .btn-icon {
+    display: inline;
+  }
+  .btn-label {
+    display: none;
   }
 }
 
@@ -402,8 +412,7 @@ td.col-total {
   }
 
   .header {
-    flex-direction: column;
-    gap: 12px;
+    align-items: center;
   }
 
   .stats-grid {
