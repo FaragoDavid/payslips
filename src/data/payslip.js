@@ -29,7 +29,7 @@ const categories = [
 ];
 
 for (const category of categories) {
-  if (category.groups) category.fields = category.groups.flatMap((g) => g.fields);
+  if (category.groups) category.fields = category.groups.flatMap((group) => group.fields);
 }
 
 export class Payslip {
@@ -42,12 +42,32 @@ export class Payslip {
   }
 
   sumCategory(key) {
-    const category = categories.find((c) => c.key === key);
+    const category = categories.find((category) => category.key === key);
     return category ? this.sum(category.fields) : 0;
   }
 
   netPay() {
-    return categories.reduce((sum, c) => sum + this.sum(c.fields), 0);
+    return categories.reduce((sum, category) => sum + this.sum(category.fields), 0);
+  }
+
+  static updateSortIndices(payslips) {
+    function sortFields(fields) {
+      const counts = Object.fromEntries(fields.map((field) => [field, 0]));
+      for (const payslip of payslips) {
+        for (const field of fields) {
+          if (payslip[field]) counts[field]++;
+        }
+      }
+      fields.sort((fieldA, fieldB) => counts[fieldB] - counts[fieldA]);
+    }
+    for (const category of categories) {
+      if (category.groups) {
+        for (const group of category.groups) sortFields(group.fields);
+        category.fields = category.groups.flatMap((group) => group.fields);
+      } else {
+        sortFields(category.fields);
+      }
+    }
   }
 
   static get categories() {

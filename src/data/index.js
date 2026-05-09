@@ -20,7 +20,11 @@ export async function loadPayslipData(forceRefresh = false) {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const cached = JSON.parse(raw);
-        if (cached && cached.length > 0) return hydrate(cached);
+        if (cached && cached.length > 0) {
+          const payslips = hydrate(cached);
+          Payslip.updateSortIndices(payslips);
+          return payslips;
+        }
       }
     } catch {}
   } else {
@@ -29,7 +33,9 @@ export async function loadPayslipData(forceRefresh = false) {
 
   const data = await fetchFromSource();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  return hydrate(data);
+  const payslips = hydrate(data);
+  Payslip.updateSortIndices(payslips);
+  return payslips;
 }
 
 export async function addPayslip(data) {
