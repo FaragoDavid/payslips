@@ -29,10 +29,10 @@ function NetRow({ monthlySlots }) {
 
 function FieldRow({ field, monthlySlots }) {
   let total = 0;
-  const cells = monthlySlots.map((payslip) => {
+  const cells = monthlySlots.map((payslip, index) => {
     const value = payslip ? payslip[field] || 0 : 0;
     total += value;
-    return <Cell value={value} />;
+    return <Cell key={index} value={value} />;
   });
   return (
     <tr className="row-item">
@@ -45,13 +45,13 @@ function FieldRow({ field, monthlySlots }) {
 
 function GroupRow({ group, monthlySlots }) {
   let total = 0;
-  const cells = monthlySlots.map((payslip) => {
+  const cells = monthlySlots.map((payslip, index) => {
     if (payslip) {
       const groupSum = payslip.sum(group.fields);
       total += groupSum;
-      return <Cell value={groupSum} />;
+      return <Cell key={index} value={groupSum} />;
     } else {
-      return <Cell value={0} />;
+      return <Cell key={index} value={0} />;
     }
   });
 
@@ -66,13 +66,13 @@ function GroupRow({ group, monthlySlots }) {
 
 function CategoryRow({ category, monthlySlots }) {
   let total = 0;
-  const cells = monthlySlots.map((payslip) => {
+  const cells = monthlySlots.map((payslip, index) => {
     if (payslip) {
       const categorySum = payslip.sumCategory(category.key);
       total += categorySum;
-      return <Cell value={categorySum} />;
+      return <Cell key={index} value={categorySum} />;
     } else {
-      return <Cell value={0} />;
+      return <Cell key={index} value={0} />;
     }
   });
 

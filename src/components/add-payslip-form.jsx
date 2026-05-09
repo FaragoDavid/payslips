@@ -40,7 +40,7 @@ export default function AddPayslipForm({ onSave, onCancel, defaultYear, defaultM
             ))}
           </select>
         </div>
-        {sortedCategories.map((category) => (
+        {Payslip.categories.map((category) => (
           <fieldset key={category.key}>
             <legend>{strings.categories[category.key]}</legend>
             {category.groups
