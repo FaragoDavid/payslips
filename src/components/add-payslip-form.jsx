@@ -60,6 +60,7 @@ export default function AddPayslipForm({ onSave, onCancel }) {
                           value={fields[field]}
                           onChange={(e) => handleFieldChange(field, e.target.value)}
                           placeholder="0"
+                          autoFocus={field === allFields[0]}
                         />
                       </div>
                     ))}
