@@ -22,11 +22,18 @@ const ITEM_COLOR_RANGES = {
 
 const SINGLE_ITEM_RATIO = 0.5;
 const CUTOUT_PERCENTAGE = '25%';
-const LAYOUT_PADDING = 40;
-const OUTER_LABEL_FONT_SIZE = 13;
-const OUTER_LABEL_OFFSET = 4;
-const INNER_LABEL_FONT_SIZE = 15;
+const LAYOUT_PADDING = 10;
+const OUTER_LABEL_FONT_SIZE = 11;
+const INNER_LABEL_FONT_SIZE = 13;
 const INNER_RING_WEIGHT = 1.5;
+const MIN_LABEL_PERCENTAGE = 0.05;
+
+function labelColor(bgHex) {
+  const r = parseInt(bgHex.slice(1, 3), 16);
+  const g = parseInt(bgHex.slice(3, 5), 16);
+  const b = parseInt(bgHex.slice(5, 7), 16);
+  return (r * 299 + g * 587 + b * 114) / 1000 > 150 ? '#333' : '#fff';
+}
 
 function buildChartData(payslips) {
   const allFields = Payslip.categories.flatMap(({ fields }) => fields);
@@ -45,19 +52,19 @@ function buildChartData(payslips) {
   const outerColors = [];
 
   for (const category of Payslip.categories) {
-    const categoryTotal = payslips.reduce((sum, payslip) => sum + payslip.sumCategory(category.key), 0);
+    const categoryTotal = Math.abs(payslips.reduce((sum, payslip) => sum + payslip.sumCategory(category.key), 0));
     if (categoryTotal === 0) continue;
 
     innerLabels.push(strings.categories[category.key]);
     innerValues.push(categoryTotal);
     innerColors.push(CATEGORY_COLORS[category.key]);
 
-    const activeFields = category.fields.filter((field) => aggregated[field] > 0);
+    const activeFields = category.fields.filter((field) => aggregated[field]);
     const [colorStart, colorEnd] = ITEM_COLOR_RANGES[category.key];
 
     activeFields.forEach((field, index) => {
       outerLabels.push(strings.fields[field]);
-      outerValues.push(aggregated[field]);
+      outerValues.push(Math.abs(aggregated[field]));
       const ratio = activeFields.length > 1 ? index / (activeFields.length - 1) : SINGLE_ITEM_RATIO;
       outerColors.push(interpolateHexColor(colorStart, colorEnd, ratio));
     });
@@ -96,12 +103,14 @@ export default function CategoryChart({ payslips }) {
             backgroundColor: outerColors,
             labels: outerLabels,
             datalabels: {
-              display: 'auto',
-              anchor: 'end',
-              align: 'end',
-              offset: OUTER_LABEL_OFFSET,
+              display: (context) => {
+                const total = context.dataset.data.reduce((s, v) => s + v, 0);
+                return context.dataset.data[context.dataIndex] / total >= MIN_LABEL_PERCENTAGE;
+              },
+              anchor: 'center',
+              align: 'center',
               font: { size: OUTER_LABEL_FONT_SIZE },
-              color: '#333',
+              color: (context) => labelColor(context.dataset.backgroundColor[context.dataIndex]),
               formatter: (value, context) => {
                 const label = context.dataset.labels[context.dataIndex];
                 return `${label}\n${formatCurrency(value)}`;
