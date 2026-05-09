@@ -21,7 +21,7 @@ function buildLineData(payslips) {
       data,
       borderColor: YEAR_COLORS[index % YEAR_COLORS.length],
       backgroundColor: YEAR_COLORS[index % YEAR_COLORS.length],
-      tension: 0.3,
+      tension: 0,
       spanGaps: false,
     };
   });
