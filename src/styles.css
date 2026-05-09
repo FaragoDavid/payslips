@@ -327,7 +327,7 @@ tbody td:last-child {
 }
 
 .table-wrapper {
-  max-height: 600px;
+  max-height: calc(100vh - 200px);
   overflow: auto;
 }
 
