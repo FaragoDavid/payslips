@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { signOut } from '../services/auth.js';
 import { loadPayslipData, addPayslip } from '../data/index.js';
 import { strings } from '../i18n/strings.js';
 import MonthlyTable from './tables/monthly-table.jsx';
@@ -7,7 +6,7 @@ import CategoryChart from './charts/category-chart.jsx';
 import YearlyTable from './tables/yearly-table.jsx';
 import MonthlyTrendChart from './charts/monthly-trend-chart.jsx';
 import YearlyBarChart from './charts/yearly-bar-chart.jsx';
-import { Plus, RefreshCw, LogOut } from 'lucide-react';
+import DashboardHeader from './dashboard-header.jsx';
 import AddPayslipForm from './add-payslip-form.jsx';
 
 const VIEW_KEY = 'payslips_view';
@@ -60,8 +59,6 @@ export default function Dashboard() {
     localStorage.setItem(VIEW_KEY, newView);
   };
 
-  const handleRefresh = () => fetchData(true);
-
   const handleAddPayslip = async (data) => {
     const newPayslip = await addPayslip(data);
     setPayslips((prev) => {
@@ -71,39 +68,13 @@ export default function Dashboard() {
     setShowForm(false);
   };
 
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-    } catch (err) {
-      console.error('Error during sign-out:', err);
-    }
-  };
-
   const payslipsOfSelectedYear = payslips && selectedYear !== null ? payslips.filter((payslip) => payslip.year === selectedYear) : [];
 
   const needsYearSelect = view === TABLE || view === CHART;
 
   return (
     <div className="section">
-      <div className="header">
-        <div>
-          <h1>{strings.title}</h1>
-        </div>
-        <div className="header-actions">
-          <button className="btn btn-small" onClick={() => setShowForm(true)} disabled={showForm}>
-            <Plus className="btn-icon" size={18} />
-            <span className="btn-label">{strings.addForm.addButton}</span>
-          </button>
-          <button className="btn btn-small btn-refresh" onClick={handleRefresh} disabled={loading}>
-            <RefreshCw className="btn-icon" size={18} />
-            <span className="btn-label">{loading ? strings.dashboard.loading : strings.dashboard.refreshButton}</span>
-          </button>
-          <button className="btn btn-small" onClick={handleSignOut}>
-            <LogOut className="btn-icon" size={18} />
-            <span className="btn-label">{strings.dashboard.signOut}</span>
-          </button>
-        </div>
-      </div>
+      <DashboardHeader onAdd={() => setShowForm(true)} onRefresh={() => fetchData(true)} loading={loading} addDisabled={showForm} />
       <div className="cards-container">
         <div className="card">
           <div className="card-header">
