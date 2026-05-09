@@ -309,8 +309,8 @@ tbody tr:hover {
   color: #1b5e20;
 }
 
-thead th:last-child,
-tbody td:last-child {
+thead th.col-total,
+td.col-total {
   border-left: 2px solid #ddd;
   font-weight: 600;
 }

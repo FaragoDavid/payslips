@@ -1,74 +1,28 @@
 import React from 'react';
 import { strings } from '../../i18n/strings.js';
 import { Payslip } from '../../data/payslip.js';
-import { formatNumber } from '../../utils/format.js';
-
-function Cell({ value }) {
-  if (!value) return <td>-</td>;
-  const formatted = formatNumber(value);
-  return <td>{value < 0 ? <span className="negative">{formatted}</span> : formatted}</td>;
-}
-
-function NetRow({ yearlyData }) {
-  const cells = yearlyData.map(({ payslips }, index) => {
-    const value = payslips.reduce((sum, p) => sum + p.netPay(), 0);
-    return <Cell key={index} value={value} />;
-  });
-  return (
-    <tr className="row-net">
-      <td>{strings.fields.net}</td>
-      {cells}
-    </tr>
-  );
-}
-
-function FieldRow({ field, yearlyData }) {
-  const cells = yearlyData.map(({ payslips }, index) => {
-    const value = payslips.reduce((sum, p) => sum + (p[field] || 0), 0);
-    return <Cell key={index} value={value} />;
-  });
-  return (
-    <tr className="row-item">
-      <td>{strings.fields[field]}</td>
-      {cells}
-    </tr>
-  );
-}
-
-function GroupRow({ group, yearlyData }) {
-  const cells = yearlyData.map(({ payslips }, index) => {
-    const value = payslips.reduce((sum, p) => sum + p.sum(group.fields), 0);
-    return <Cell key={index} value={value} />;
-  });
-  return (
-    <tr className="row-group">
-      <td>{strings.groups[group.key]}</td>
-      {cells}
-    </tr>
-  );
-}
-
-function CategoryRow({ category, yearlyData }) {
-  const cells = yearlyData.map(({ payslips }, index) => {
-    const value = payslips.reduce((sum, p) => sum + p.sumCategory(category.key), 0);
-    return <Cell key={index} value={value} />;
-  });
-  return (
-    <tr className="row-category">
-      <td>{strings.categories[category.key]}</td>
-      {cells}
-    </tr>
-  );
-}
+import Row from './row.jsx';
 
 export default function YearlyTable({ payslips }) {
   const years = [...new Set(payslips.map((p) => p.year))].sort();
-  const yearlyData = years.map((year) => ({
-    year,
-    payslips: payslips.filter((p) => p.year === year),
-  }));
+  const yearlyData = payslips.reduce((data, payslip) => {
+    let yearData = data.find((d) => d.year === payslip.year);
+    if (!yearData) {
+      yearData = { year: payslip.year };
+      data.push(yearData);
+    }
 
-  const activeFields = (category) => category.fields.filter((f) => payslips.some((p) => p[f]));
+    for (const field in payslip) {
+      if (field !== 'year' && field !== 'month') {
+        yearData[field] = (yearData[field] || 0) + (payslip[field] || 0);
+      }
+    }
+
+    return data;
+  }, []);
+
+  const columns = years;
+  const fieldValues = (valueFn) => yearlyData.map((d) => ({ column: d.year, value: valueFn(d) }));
 
   return (
     <table className="payslip-table">
@@ -81,21 +35,56 @@ export default function YearlyTable({ payslips }) {
         </tr>
       </thead>
       <tbody>
-        <NetRow yearlyData={yearlyData} />
+        <Row
+          className="row-net"
+          label={strings.table.net}
+          fieldValues={fieldValues((d) =>
+            Payslip.categories.reduce((sum, cat) => sum + cat.fields.reduce((s, f) => s + (d[f] || 0), 0), 0),
+          )}
+          columns={columns}
+        />
         {Payslip.categories.flatMap((category) => {
-          const fields = activeFields(category);
+          const activeFields = category.fields.filter((f) => payslips.some((p) => p[f]));
           return [
-            <CategoryRow key={category.key} category={category} yearlyData={yearlyData} />,
+            <Row
+              key={category.key}
+              className="row-category"
+              label={strings.categories[category.key]}
+              fieldValues={fieldValues((d) => category.fields.reduce((sum, f) => sum + (d[f] || 0), 0))}
+              columns={columns}
+            />,
             ...(category.groups
               ? category.groups.flatMap((group) => {
-                  const groupFields = group.fields.filter((f) => fields.includes(f));
+                  const groupFields = group.fields.filter((f) => activeFields.includes(f));
                   if (groupFields.length === 0) return [];
                   return [
-                    <GroupRow key={`group-${category.key}-${group.key}`} group={group} yearlyData={yearlyData} />,
-                    ...groupFields.map((field) => <FieldRow key={field} field={field} yearlyData={yearlyData} />),
+                    <Row
+                      key={`group-${category.key}-${group.key}`}
+                      className="row-group"
+                      label={strings.groups[group.key]}
+                      fieldValues={fieldValues((d) => group.fields.reduce((sum, f) => sum + (d[f] || 0), 0))}
+                      columns={columns}
+                    />,
+                    ...groupFields.map((field) => (
+                      <Row
+                        key={field}
+                        className="row-item"
+                        label={strings.fields[field]}
+                        fieldValues={fieldValues((d) => d[field])}
+                        columns={columns}
+                      />
+                    )),
                   ];
                 })
-              : fields.map((field) => <FieldRow key={field} field={field} yearlyData={yearlyData} />)),
+              : activeFields.map((field) => (
+                  <Row
+                    key={field}
+                    className="row-item"
+                    label={strings.fields[field]}
+                    fieldValues={fieldValues((d) => d[field])}
+                    columns={columns}
+                  />
+                ))),
           ];
         })}
       </tbody>
