@@ -151,9 +151,30 @@ p {
   background: rgba(67, 160, 71, 0.8);
 }
 
+.view-select {
+  display: none;
+  padding: 8px 12px;
+  border: 2px solid #2d3561;
+  border-radius: 8px;
+  background: white;
+  color: #2d3561;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 .view-toggle {
   display: flex;
   gap: 0;
+}
+
+@media (max-width: 600px) {
+  .view-toggle {
+    display: none;
+  }
+  .view-select {
+    display: block;
+  }
 }
 
 .view-btn {

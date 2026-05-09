@@ -120,6 +120,13 @@ export default function Dashboard() {
                 {strings.dashboard.yoyBar}
               </button>
             </div>
+            <select className="view-select" value={view} onChange={(e) => handleViewChange(e.target.value)}>
+              <option value={TABLE}>{strings.dashboard.monthly}</option>
+              <option value={YEARLY}>{strings.dashboard.yearly}</option>
+              <option value={CHART}>{strings.dashboard.chart}</option>
+              <option value={YOY_LINE}>{strings.dashboard.yoyLine}</option>
+              <option value={YOY_BAR}>{strings.dashboard.yoyBar}</option>
+            </select>
             {needsYearSelect && (
               <select
                 className="year-select"
