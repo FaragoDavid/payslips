@@ -283,14 +283,23 @@ thead th {
   border-bottom: 2px solid #ddd;
 }
 
+thead th:first-child,
+tbody td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+
 thead th:first-child {
   text-align: left;
+  z-index: 2;
 }
 
 tbody td {
   padding: 6px;
   text-align: right;
   border-bottom: 1px solid #eee;
+  background: white;
 }
 
 tbody td:first-child {
@@ -298,7 +307,7 @@ tbody td:first-child {
   font-weight: 500;
 }
 
-tbody tr:hover {
+tbody tr:hover td {
   background: #f0f7ff;
 }
 
