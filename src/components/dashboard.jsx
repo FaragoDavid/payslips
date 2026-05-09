@@ -10,6 +10,7 @@ import YearlyBarChart from './charts/yearly-bar-chart.jsx';
 import AddPayslipForm from './add-payslip-form.jsx';
 
 const VIEW_KEY = 'payslips_view';
+const YEAR_KEY = 'payslips_year';
 const TABLE = 'table';
 const CHART = 'chart';
 const YEARLY = 'yearly';
@@ -21,7 +22,10 @@ export default function Dashboard() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [view, setView] = useState(() => localStorage.getItem(VIEW_KEY) || TABLE);
-  const [selectedYear, setSelectedYear] = useState(null);
+  const [selectedYear, setSelectedYear] = useState(() => {
+    const stored = localStorage.getItem(YEAR_KEY);
+    return stored ? Number(stored) : null;
+  });
   const [showForm, setShowForm] = useState(false);
 
   const fetchData = useCallback(async (forceRefresh = false) => {
@@ -45,7 +49,7 @@ export default function Dashboard() {
   const years = payslips ? [...new Set(payslips.map((payslip) => payslip.year))].sort() : [];
 
   useEffect(() => {
-    if (years.length > 0 && selectedYear === null) {
+    if (years.length > 0 && (selectedYear === null || !years.includes(selectedYear))) {
       setSelectedYear(years[years.length - 1]);
     }
   }, [years, selectedYear]);
@@ -117,7 +121,15 @@ export default function Dashboard() {
               </button>
             </div>
             {needsYearSelect && (
-              <select className="year-select" value={selectedYear || ''} onChange={(event) => setSelectedYear(Number(event.target.value))}>
+              <select
+                className="year-select"
+                value={selectedYear || ''}
+                onChange={(event) => {
+                  const year = Number(event.target.value);
+                  setSelectedYear(year);
+                  localStorage.setItem(YEAR_KEY, year);
+                }}
+              >
                 {years.map((year) => (
                   <option key={year} value={year}>
                     {year}
