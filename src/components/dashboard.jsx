@@ -158,7 +158,14 @@ export default function Dashboard() {
       {showForm && (
         <div className="popover-overlay" onClick={() => setShowForm(false)}>
           <div className="popover" onClick={(e) => e.stopPropagation()}>
-            <AddPayslipForm onSave={handleAddPayslip} onCancel={() => setShowForm(false)} />
+            <AddPayslipForm
+              onSave={handleAddPayslip}
+              onCancel={() => setShowForm(false)}
+              defaultYear={selectedYear}
+              defaultMonth={
+                Array.from({ length: 12 }, (_, i) => i + 1).find((m) => !payslipsOfSelectedYear.some((p) => p.month === m)) || 1
+              }
+            />
           </div>
         </div>
       )}

@@ -2,15 +2,11 @@ import React, { useState } from 'react';
 import { Payslip } from '../data/payslip.js';
 import { strings } from '../i18n/strings.js';
 
-const currentDate = new Date();
-const defaultYear = currentDate.getFullYear();
-const defaultMonth = currentDate.getMonth() + 1;
-
 const allFields = Payslip.categories.flatMap((c) => c.fields);
 
-export default function AddPayslipForm({ onSave, onCancel }) {
-  const [year, setYear] = useState(defaultYear);
-  const [month, setMonth] = useState(defaultMonth);
+export default function AddPayslipForm({ onSave, onCancel, defaultYear, defaultMonth }) {
+  const [year, setYear] = useState(defaultYear || new Date().getFullYear());
+  const [month, setMonth] = useState(defaultMonth || 1);
   const [fields, setFields] = useState(() => Object.fromEntries(allFields.map((f) => [f, ''])));
 
   const handleFieldChange = (key, value) => {
