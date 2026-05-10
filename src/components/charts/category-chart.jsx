@@ -43,10 +43,10 @@ function buildChartData(payslips) {
     const activeFields = category.fields.filter((field) => aggregated[field]);
     const [colorStart, colorEnd] = FIELD_COLOR_RANGES[category.key];
 
-    activeFields.forEach((field, index) => {
+    activeFields.forEach((field) => {
       outerLabels.push(strings.fields[field]);
       outerValues.push(Math.abs(aggregated[field]));
-      const ratio = activeFields.length > 1 ? index / (activeFields.length - 1) : SINGLE_ITEM_RATIO;
+      const ratio = category.fields.length > 1 ? category.fields.indexOf(field) / (category.fields.length - 1) : SINGLE_ITEM_RATIO;
       outerColors.push(interpolateHexColor(colorStart, colorEnd, ratio));
     });
   }

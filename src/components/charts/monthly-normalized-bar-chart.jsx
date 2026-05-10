@@ -27,9 +27,9 @@ function buildBarData(payslips) {
   for (const category of Payslip.categories) {
     const [colorStart, colorEnd] = FIELD_COLOR_RANGES[category.key];
     const activeFields = category.fields.filter((field) => payslips.some((p) => p[field]));
-    activeFields.forEach((field, index) => {
+    activeFields.forEach((field) => {
       const values = payslips.map((p) => Math.abs(p[field] || 0));
-      const ratio = activeFields.length > 1 ? index / (activeFields.length - 1) : 0.5;
+      const ratio = category.fields.length > 1 ? category.fields.indexOf(field) / (category.fields.length - 1) : 0.5;
       fieldDatasets.push({
         label: strings.fields[field],
         data: totals.map((total, i) => (total > 0 ? (values[i] / total) * 100 : 0)),
