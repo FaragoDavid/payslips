@@ -14,6 +14,8 @@ export const strings = {
     yoyLine: 'Éves trend',
     yoyBar: 'Éves összehasonlítás',
     yearly: 'Éves részletek',
+    monthlyBar: 'Havi arányok',
+    yearlyNormBar: 'Éves arányok',
   },
   stats: {
     latestNet: 'Utolsó nettó',

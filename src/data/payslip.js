@@ -19,12 +19,12 @@ const categories = [
     ],
   },
   {
-    key: 'deductions',
-    fields: ['tax_advance', 'other_deductions', 'social_security', 'in_kind_pay_net'],
-  },
-  {
     key: 'cafeteria',
     fields: ['szep_card_accommodation'],
+  },
+  {
+    key: 'deductions',
+    fields: ['tax_advance', 'other_deductions', 'social_security', 'in_kind_pay_net'],
   },
 ];
 
@@ -68,6 +68,19 @@ export class Payslip {
         sortFields(category.fields);
       }
     }
+  }
+
+  static aggregateByYear(payslips) {
+    const map = {};
+    for (const payslip of payslips) {
+      if (!map[payslip.year]) map[payslip.year] = { year: payslip.year };
+      for (const field in payslip) {
+        if (field !== 'year' && field !== 'month') {
+          map[payslip.year][field] = (map[payslip.year][field] || 0) + (payslip[field] || 0);
+        }
+      }
+    }
+    return Object.values(map).map((data) => new Payslip(data));
   }
 
   static get categories() {

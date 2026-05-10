@@ -1,46 +1,64 @@
 import React, { useRef, useEffect } from 'react';
 import { Chart, BarController, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import { Payslip } from '../../data/payslip.js';
 import { strings } from '../../i18n/strings.js';
-import { formatCurrency } from '../../utils/format.js';
 
 Chart.register(BarController, BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
 const NET_COLOR = '#2196f3';
 const DEDUCTIONS_COLOR = '#e53935';
+const CAFETERIA_COLOR = '#ff9800';
 const BAR_BORDER_RADIUS = 3;
 const DATALABEL_FONT_SIZE = 12;
 
-function buildBarData(yearlyPayslips) {
+function buildBarData(payslips) {
+  const months = payslips.map((p) => strings.months[p.month - 1]);
+  const netValues = payslips.map((p) => p.netPay());
+  const deductionValues = payslips.map((p) => Math.abs(p.sumCategory('deductions')));
+  const cafeteriaValues = payslips.map((p) => p.sumCategory('cafeteria'));
+
+  const totals = payslips.map((_, i) => netValues[i] + deductionValues[i] + cafeteriaValues[i]);
+
   return {
-    labels: yearlyPayslips.map((p) => String(p.year)),
+    labels: months,
     datasets: [
       {
         label: strings.table.net,
-        data: yearlyPayslips.map((p) => p.netPay()),
+        data: totals.map((total, i) => (total > 0 ? (netValues[i] / total) * 100 : 0)),
         backgroundColor: NET_COLOR,
         borderRadius: BAR_BORDER_RADIUS,
         stack: 'stack',
+        raw: netValues,
       },
       {
         label: strings.categories.deductions,
-        data: yearlyPayslips.map((p) => -p.sumCategory('deductions')),
+        data: totals.map((total, i) => (total > 0 ? (deductionValues[i] / total) * 100 : 0)),
         backgroundColor: DEDUCTIONS_COLOR,
         borderRadius: BAR_BORDER_RADIUS,
         stack: 'stack',
+        raw: deductionValues,
+      },
+      {
+        label: strings.categories.cafeteria,
+        data: totals.map((total, i) => (total > 0 ? (cafeteriaValues[i] / total) * 100 : 0)),
+        backgroundColor: CAFETERIA_COLOR,
+        borderRadius: BAR_BORDER_RADIUS,
+        stack: 'stack',
+        raw: cafeteriaValues,
       },
     ],
   };
 }
 
-export default function YearlyBarChart({ yearlyPayslips }) {
+export default function MonthlyNormalizedBarChart({ payslips }) {
   const canvasRef = useRef(null);
   const chartRef = useRef(null);
 
   useEffect(() => {
-    if (!canvasRef.current || yearlyPayslips.length === 0) return;
+    if (!canvasRef.current || payslips.length === 0) return;
 
-    const chartData = buildBarData(yearlyPayslips);
+    const chartData = buildBarData(payslips);
 
     if (chartRef.current) {
       chartRef.current.data = chartData;
@@ -60,7 +78,7 @@ export default function YearlyBarChart({ yearlyPayslips }) {
           legend: { position: 'top' },
           tooltip: {
             callbacks: {
-              label: (context) => `${context.dataset.label}: ${formatCurrency(context.raw)}`,
+              label: (context) => `${context.dataset.label}: ${context.raw.toFixed(1)}%`,
             },
           },
           datalabels: {
@@ -68,16 +86,18 @@ export default function YearlyBarChart({ yearlyPayslips }) {
             align: 'center',
             font: { size: DATALABEL_FONT_SIZE, weight: 'bold' },
             color: '#fff',
-            formatter: (value) => formatCurrency(value),
+            display: (context) => context.dataset.data[context.dataIndex] >= 5,
+            formatter: (value) => value.toFixed(0) + '%',
           },
         },
         scales: {
           x: { stacked: true },
           y: {
             stacked: true,
-            beginAtZero: true,
+            min: 0,
+            max: 100,
             ticks: {
-              callback: (value) => formatCurrency(value),
+              callback: (value) => value + '%',
             },
           },
         },
@@ -88,7 +108,7 @@ export default function YearlyBarChart({ yearlyPayslips }) {
       chartRef.current?.destroy();
       chartRef.current = null;
     };
-  }, [yearlyPayslips]);
+  }, [payslips]);
 
   return <canvas ref={canvasRef} />;
 }

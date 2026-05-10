@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { loadPayslipData, addPayslip } from '../data/index.js';
+import { Payslip } from '../data/payslip.js';
 import { strings } from '../i18n/strings.js';
 import MonthlyTable from './tables/monthly-table.jsx';
 import CategoryChart from './charts/category-chart.jsx';
 import YearlyTable from './tables/yearly-table.jsx';
 import MonthlyTrendChart from './charts/monthly-trend-chart.jsx';
 import YearlyBarChart from './charts/yearly-bar-chart.jsx';
+import MonthlyNormalizedBarChart from './charts/monthly-normalized-bar-chart.jsx';
+import YearlyNormalizedBarChart from './charts/yearly-normalized-bar-chart.jsx';
 import DashboardHeader from './dashboard-header.jsx';
 import AddPayslipForm from './add-payslip-form.jsx';
 
@@ -16,6 +19,8 @@ const CHART = 'chart';
 const YEARLY = 'yearly';
 const YOY_LINE = 'yoy-line';
 const YOY_BAR = 'yoy-bar';
+const MONTHLY_BAR = 'monthly-bar';
+const YEARLY_NORM_BAR = 'yearly-norm-bar';
 
 export default function Dashboard() {
   const [payslips, setPayslips] = useState(null);
@@ -46,7 +51,9 @@ export default function Dashboard() {
     fetchData();
   }, [fetchData]);
 
-  const years = payslips ? [...new Set(payslips.map((payslip) => payslip.year))].sort() : [];
+  const yearlyPayslips = payslips ? Payslip.aggregateByYear(payslips) : [];
+  const years = yearlyPayslips.map(({ year }) => year);
+  const payslipsOfSelectedYear = payslips && selectedYear !== null ? payslips.filter(({ year }) => year === selectedYear) : [];
 
   useEffect(() => {
     if (years.length > 0 && (selectedYear === null || !years.includes(selectedYear))) {
@@ -62,15 +69,13 @@ export default function Dashboard() {
   const handleAddPayslip = async (data) => {
     const newPayslip = await addPayslip(data);
     setPayslips((prev) => {
-      const filtered = prev.filter((p) => p.year !== data.year || p.month !== data.month);
+      const filtered = prev.filter(({ year, month }) => year !== data.year || month !== data.month);
       return [...filtered, newPayslip].sort((a, b) => a.year - b.year || a.month - b.month);
     });
     setShowForm(false);
   };
 
-  const payslipsOfSelectedYear = payslips && selectedYear !== null ? payslips.filter((payslip) => payslip.year === selectedYear) : [];
-
-  const needsYearSelect = view === TABLE || view === CHART;
+  const needsYearSelect = view === TABLE || view === CHART || view === MONTHLY_BAR;
 
   return (
     <div className="section">
@@ -82,25 +87,33 @@ export default function Dashboard() {
               <button className={`view-btn ${view === TABLE ? 'active' : ''}`} onClick={() => handleViewChange(TABLE)}>
                 {strings.dashboard.monthly}
               </button>
-              <button className={`view-btn ${view === YEARLY ? 'active' : ''}`} onClick={() => handleViewChange(YEARLY)}>
-                {strings.dashboard.yearly}
-              </button>
               <button className={`view-btn ${view === CHART ? 'active' : ''}`} onClick={() => handleViewChange(CHART)}>
                 {strings.dashboard.chart}
               </button>
-              <button className={`view-btn ${view === YOY_LINE ? 'active' : ''}`} onClick={() => handleViewChange(YOY_LINE)}>
-                {strings.dashboard.yoyLine}
+              <button className={`view-btn ${view === MONTHLY_BAR ? 'active' : ''}`} onClick={() => handleViewChange(MONTHLY_BAR)}>
+                {strings.dashboard.monthlyBar}
+              </button>
+              <button className={`view-btn ${view === YEARLY ? 'active' : ''}`} onClick={() => handleViewChange(YEARLY)}>
+                {strings.dashboard.yearly}
               </button>
               <button className={`view-btn ${view === YOY_BAR ? 'active' : ''}`} onClick={() => handleViewChange(YOY_BAR)}>
                 {strings.dashboard.yoyBar}
               </button>
+              <button className={`view-btn ${view === YEARLY_NORM_BAR ? 'active' : ''}`} onClick={() => handleViewChange(YEARLY_NORM_BAR)}>
+                {strings.dashboard.yearlyNormBar}
+              </button>
+              <button className={`view-btn ${view === YOY_LINE ? 'active' : ''}`} onClick={() => handleViewChange(YOY_LINE)}>
+                {strings.dashboard.yoyLine}
+              </button>
             </div>
             <select className="view-select" value={view} onChange={(e) => handleViewChange(e.target.value)}>
               <option value={TABLE}>{strings.dashboard.monthly}</option>
-              <option value={YEARLY}>{strings.dashboard.yearly}</option>
               <option value={CHART}>{strings.dashboard.chart}</option>
-              <option value={YOY_LINE}>{strings.dashboard.yoyLine}</option>
+              <option value={MONTHLY_BAR}>{strings.dashboard.monthlyBar}</option>
+              <option value={YEARLY}>{strings.dashboard.yearly}</option>
               <option value={YOY_BAR}>{strings.dashboard.yoyBar}</option>
+              <option value={YEARLY_NORM_BAR}>{strings.dashboard.yearlyNormBar}</option>
+              <option value={YOY_LINE}>{strings.dashboard.yoyLine}</option>
             </select>
             {needsYearSelect && (
               <select
@@ -139,12 +152,22 @@ export default function Dashboard() {
           )}
           {view === YOY_BAR && payslips && payslips.length > 0 && (
             <div className="chart-container">
-              <YearlyBarChart payslips={payslips} />
+              <YearlyBarChart yearlyPayslips={yearlyPayslips} />
+            </div>
+          )}
+          {view === MONTHLY_BAR && payslipsOfSelectedYear.length > 0 && (
+            <div className="chart-container">
+              <MonthlyNormalizedBarChart payslips={payslipsOfSelectedYear} />
+            </div>
+          )}
+          {view === YEARLY_NORM_BAR && payslips && payslips.length > 0 && (
+            <div className="chart-container">
+              <YearlyNormalizedBarChart yearlyPayslips={yearlyPayslips} />
             </div>
           )}
           {view === YEARLY && payslips && payslips.length > 0 && (
             <div className="table-wrapper">
-              <YearlyTable payslips={payslips} />
+              <YearlyTable yearlyPayslips={yearlyPayslips} payslips={payslips} />
             </div>
           )}
         </div>
