@@ -162,7 +162,7 @@ export default function Dashboard() {
           )}
           {view === YEARLY_NORM_BAR && payslips && payslips.length > 0 && (
             <div className="chart-container">
-              <YearlyNormalizedBarChart yearlyPayslips={yearlyPayslips} />
+              <YearlyNormalizedBarChart yearlyPayslips={yearlyPayslips} payslips={payslips} />
             </div>
           )}
           {view === YEARLY && payslips && payslips.length > 0 && (
