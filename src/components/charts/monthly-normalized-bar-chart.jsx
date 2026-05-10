@@ -3,25 +3,12 @@ import { Chart, BarController, BarElement, CategoryScale, LinearScale, Tooltip, 
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { Payslip } from '../../data/payslip.js';
 import { strings } from '../../i18n/strings.js';
-import { interpolateHexColor } from '../../utils/interpolate-hex-color.js';
+import { interpolateHexColor, labelColor, CATEGORY_COLORS, FIELD_COLOR_RANGES } from '../../utils/colors.js';
 
 Chart.register(BarController, BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
-const CATEGORY_COLORS = { income: '#4caf50', deductions: '#e53935', cafeteria: '#ff9800' };
-const FIELD_COLOR_RANGES = {
-  income: ['#81c784', '#2e7d32'],
-  deductions: ['#ef9a9a', '#b71c1c'],
-  cafeteria: ['#ffcc80', '#e65100'],
-};
 const DATALABEL_FONT_SIZE = 11;
 const MIN_LABEL_PERCENTAGE = 5;
-
-function labelColor(bgHex) {
-  const r = parseInt(bgHex.slice(1, 3), 16);
-  const g = parseInt(bgHex.slice(3, 5), 16);
-  const b = parseInt(bgHex.slice(5, 7), 16);
-  return (r * 299 + g * 587 + b * 114) / 1000 > 150 ? '#333' : '#fff';
-}
 
 function buildBarData(payslips) {
   const labels = payslips.map((p) => strings.months[p.month - 1]);

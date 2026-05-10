@@ -2,10 +2,9 @@ import React, { useRef, useEffect } from 'react';
 import { Chart, LineController, LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js';
 import { strings } from '../../i18n/strings.js';
 import { formatCurrency } from '../../utils/format.js';
+import { yearColor } from '../../utils/colors.js';
 
 Chart.register(LineController, LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend);
-
-const YEAR_COLORS = ['#4caf50', '#2196f3', '#ff9800', '#e53935', '#9c27b0', '#00bcd4'];
 
 function buildLineData(payslips) {
   const years = [...new Set(payslips.map((p) => p.year))].sort();
@@ -16,11 +15,12 @@ function buildLineData(payslips) {
     for (const p of yearPayslips) {
       data[p.month - 1] = p.netPay();
     }
+    const color = yearColor(index, years.length);
     return {
       label: String(year),
       data,
-      borderColor: YEAR_COLORS[index % YEAR_COLORS.length],
-      backgroundColor: YEAR_COLORS[index % YEAR_COLORS.length],
+      borderColor: color,
+      backgroundColor: color,
       tension: 0,
       spanGaps: false,
     };

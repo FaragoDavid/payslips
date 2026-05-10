@@ -3,11 +3,10 @@ import { Chart, BarController, BarElement, CategoryScale, LinearScale, Tooltip, 
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { strings } from '../../i18n/strings.js';
 import { formatCurrency } from '../../utils/format.js';
+import { NET_COLOR, CATEGORY_COLORS } from '../../utils/colors.js';
 
 Chart.register(BarController, BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
-const NET_COLOR = '#2196f3';
-const DEDUCTIONS_COLOR = '#e53935';
 const BAR_BORDER_RADIUS = 3;
 const DATALABEL_FONT_SIZE = 12;
 
@@ -25,7 +24,7 @@ function buildBarData(yearlyPayslips) {
       {
         label: strings.categories.deductions,
         data: yearlyPayslips.map((p) => -p.sumCategory('deductions')),
-        backgroundColor: DEDUCTIONS_COLOR,
+        backgroundColor: CATEGORY_COLORS.deductions,
         borderRadius: BAR_BORDER_RADIUS,
         stack: 'stack',
       },

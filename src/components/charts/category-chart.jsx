@@ -3,22 +3,10 @@ import { Chart, DoughnutController, ArcElement, Tooltip } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { Payslip } from '../../data/payslip.js';
 import { strings } from '../../i18n/strings.js';
-import { interpolateHexColor } from '../../utils/interpolate-hex-color.js';
+import { interpolateHexColor, labelColor, CATEGORY_COLORS, FIELD_COLOR_RANGES } from '../../utils/colors.js';
 import { formatCurrency } from '../../utils/format.js';
 
 Chart.register(DoughnutController, ArcElement, Tooltip);
-
-const CATEGORY_COLORS = {
-  income: '#4caf50',
-  deductions: '#e53935',
-  cafeteria: '#ff9800',
-};
-
-const ITEM_COLOR_RANGES = {
-  income: ['#81c784', '#2e7d32'],
-  deductions: ['#ef9a9a', '#b71c1c'],
-  cafeteria: ['#ffcc80', '#e65100'],
-};
 
 const SINGLE_ITEM_RATIO = 0.5;
 const CUTOUT_PERCENTAGE = '25%';
@@ -27,13 +15,6 @@ const OUTER_LABEL_FONT_SIZE = 11;
 const INNER_LABEL_FONT_SIZE = 13;
 const INNER_RING_WEIGHT = 1.5;
 const MIN_LABEL_PERCENTAGE = 0.05;
-
-function labelColor(bgHex) {
-  const r = parseInt(bgHex.slice(1, 3), 16);
-  const g = parseInt(bgHex.slice(3, 5), 16);
-  const b = parseInt(bgHex.slice(5, 7), 16);
-  return (r * 299 + g * 587 + b * 114) / 1000 > 150 ? '#333' : '#fff';
-}
 
 function buildChartData(payslips) {
   const allFields = Payslip.categories.flatMap(({ fields }) => fields);
@@ -60,7 +41,7 @@ function buildChartData(payslips) {
     innerColors.push(CATEGORY_COLORS[category.key]);
 
     const activeFields = category.fields.filter((field) => aggregated[field]);
-    const [colorStart, colorEnd] = ITEM_COLOR_RANGES[category.key];
+    const [colorStart, colorEnd] = FIELD_COLOR_RANGES[category.key];
 
     activeFields.forEach((field, index) => {
       outerLabels.push(strings.fields[field]);
