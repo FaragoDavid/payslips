@@ -374,7 +374,32 @@ td.col-total {
 .chart-container {
   width: 100%;
   display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.chart-legend {
+  display: flex;
   justify-content: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.chart-legend-btn {
+  padding: 6px 16px;
+  border: 2px solid var(--cat-color);
+  border-radius: 6px;
+  background: var(--cat-color);
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.chart-legend-btn.inactive {
+  background: white;
+  color: var(--cat-color);
 }
 
 .chart-container canvas {

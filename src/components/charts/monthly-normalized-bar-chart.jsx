@@ -1,26 +1,34 @@
-import React, { useRef, useEffect } from 'react';
-import { Chart, BarController, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js';
+import React, { useRef, useEffect, useState } from 'react';
+import { Chart, BarController, BarElement, CategoryScale, LinearScale, Tooltip } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { Payslip } from '../../data/payslip.js';
 import { strings } from '../../i18n/strings.js';
 import { interpolateHexColor, labelColor, CATEGORY_COLORS, FIELD_COLOR_RANGES } from '../../utils/colors.js';
 
-Chart.register(BarController, BarElement, CategoryScale, LinearScale, Tooltip, Legend);
+Chart.register(BarController, BarElement, CategoryScale, LinearScale, Tooltip);
 
 const DATALABEL_FONT_SIZE = 11;
 const MIN_LABEL_PERCENTAGE = 5;
 
-function buildBarData(payslips) {
+function buildBarData(payslips, hiddenCategories) {
   const labels = payslips.map((p) => strings.months[p.month - 1]);
+  const visibleCategories = Payslip.categories.filter((cat) => !hiddenCategories[cat.key]);
   const categoryValues = Payslip.categories.map((cat) => payslips.map((p) => Math.abs(p.sumCategory(cat.key))));
-  const totals = payslips.map((_, i) => categoryValues.reduce((sum, vals) => sum + vals[i], 0));
+  const totals = payslips.map((_, i) =>
+    visibleCategories.reduce((sum, cat) => {
+      const ci = Payslip.categories.indexOf(cat);
+      return sum + categoryValues[ci][i];
+    }, 0),
+  );
 
   const categoryDatasets = Payslip.categories.map((cat, ci) => ({
     label: strings.categories[cat.key],
     data: totals.map((total, i) => (total > 0 ? (categoryValues[ci][i] / total) * 100 : 0)),
     backgroundColor: CATEGORY_COLORS[cat.key],
+    categoryKey: cat.key,
     stack: 'categories',
     barPercentage: 1,
+    hidden: !!hiddenCategories[cat.key] || visibleCategories.length === 1,
   }));
 
   const fieldDatasets = [];
@@ -34,9 +42,10 @@ function buildBarData(payslips) {
         label: strings.fields[field],
         data: totals.map((total, i) => (total > 0 ? (values[i] / total) * 100 : 0)),
         backgroundColor: interpolateHexColor(colorStart, colorEnd, ratio),
+        categoryKey: category.key,
         stack: 'fields',
         barPercentage: 1,
-        hidden: false,
+        hidden: !!hiddenCategories[category.key],
       });
     });
   }
@@ -47,11 +56,20 @@ function buildBarData(payslips) {
 export default function MonthlyNormalizedBarChart({ payslips }) {
   const canvasRef = useRef(null);
   const chartRef = useRef(null);
+  const [hiddenCategories, setHiddenCategories] = useState({});
+
+  const toggleCategory = (key) => {
+    setHiddenCategories((prev) => {
+      const next = { ...prev, [key]: !prev[key] };
+      if (Payslip.categories.every((cat) => next[cat.key])) return prev;
+      return next;
+    });
+  };
 
   useEffect(() => {
     if (!canvasRef.current || payslips.length === 0) return;
 
-    const chartData = buildBarData(payslips);
+    const chartData = buildBarData(payslips, hiddenCategories);
 
     if (chartRef.current) {
       chartRef.current.data = chartData;
@@ -68,15 +86,7 @@ export default function MonthlyNormalizedBarChart({ payslips }) {
         maintainAspectRatio: true,
         animation: false,
         plugins: {
-          legend: {
-            position: 'top',
-            labels: {
-              filter: (item) =>
-                item.text === strings.categories.income ||
-                item.text === strings.categories.deductions ||
-                item.text === strings.categories.cafeteria,
-            },
-          },
+          legend: { display: false },
           tooltip: {
             callbacks: {
               label: (context) => `${context.dataset.label}: ${context.raw.toFixed(1)}%`,
@@ -109,7 +119,23 @@ export default function MonthlyNormalizedBarChart({ payslips }) {
       chartRef.current?.destroy();
       chartRef.current = null;
     };
-  }, [payslips]);
+  }, [payslips, hiddenCategories]);
 
-  return <canvas ref={canvasRef} />;
+  return (
+    <div style={{ width: '100%' }}>
+      <div className="chart-legend">
+        {Payslip.categories.map((cat) => (
+          <button
+            key={cat.key}
+            className={`chart-legend-btn ${hiddenCategories[cat.key] ? 'inactive' : ''}`}
+            style={{ '--cat-color': CATEGORY_COLORS[cat.key] }}
+            onClick={() => toggleCategory(cat.key)}
+          >
+            {strings.categories[cat.key]}
+          </button>
+        ))}
+      </div>
+      <canvas ref={canvasRef} />
+    </div>
+  );
 }
