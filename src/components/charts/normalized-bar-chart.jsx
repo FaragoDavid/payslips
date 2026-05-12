@@ -51,18 +51,32 @@ function buildBarData(payslips, labels, shownCategories) {
   return { labels, datasets: [...categoryDatasets, ...fieldDatasets] };
 }
 
+const STORED_CATEGORIES_KEY = 'payslips_shown_categories';
+
 export default function NormalizedBarChart({ payslips, labels }) {
   const canvasRef = useRef(null);
   const chartRef = useRef(null);
-  const [shownCategories, setShownCategories] = useState(Payslip.categories.map((cat) => cat.key));
+  const [shownCategories, setShownCategories] = useState(() => {
+    const stored = localStorage.getItem(STORED_CATEGORIES_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      const valid = parsed.filter((key) => Payslip.categories.some((cat) => cat.key === key));
+      if (valid.length > 0) return valid;
+    }
+    return Payslip.categories.map((cat) => cat.key);
+  });
 
   const toggleCategory = (categoryKey) => {
     setShownCategories((current) => {
+      let next;
       if (current.includes(categoryKey)) {
         if (current.length === 1) return current;
-        return current.filter((key) => key !== categoryKey);
+        next = current.filter((key) => key !== categoryKey);
+      } else {
+        next = [...current, categoryKey];
       }
-      return [...current, categoryKey];
+      localStorage.setItem(STORED_CATEGORIES_KEY, JSON.stringify(next));
+      return next;
     });
   };
 
