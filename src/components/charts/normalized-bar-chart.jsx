@@ -10,42 +10,40 @@ Chart.register(BarController, BarElement, CategoryScale, LinearScale, Tooltip);
 const DATALABEL_FONT_SIZE = 11;
 const MIN_LABEL_PERCENTAGE = 5;
 
-function buildBarData(yearlyPayslips, allPayslips, hiddenCategories) {
-  const labels = yearlyPayslips.map((p) => String(p.year));
-  const visibleCategories = Payslip.categories.filter((cat) => !hiddenCategories[cat.key]);
-  const categoryValues = Payslip.categories.map((cat) => yearlyPayslips.map((p) => Math.abs(p.sumCategory(cat.key))));
-  const totals = yearlyPayslips.map((_, i) =>
-    visibleCategories.reduce((sum, cat) => {
-      const ci = Payslip.categories.indexOf(cat);
-      return sum + categoryValues[ci][i];
+function buildBarData(payslips, labels, shownCategories) {
+  const visibleCategories = Payslip.categories.filter((cat) => shownCategories.includes(cat.key));
+  const categoryValues = Payslip.categories.map((cat) => payslips.map((p) => Math.abs(p.sumCategory(cat.key))));
+  const totals = payslips.map((_, i) =>
+    visibleCategories.reduce((sum, category) => {
+      return sum + categoryValues[Payslip.categories.indexOf(category)][i];
     }, 0),
   );
 
-  const categoryDatasets = Payslip.categories.map((cat, ci) => ({
-    label: strings.categories[cat.key],
+  const categoryDatasets = Payslip.categories.map(({ key }, ci) => ({
+    label: strings.categories[key],
     data: totals.map((total, i) => (total > 0 ? (categoryValues[ci][i] / total) * 100 : 0)),
-    backgroundColor: CATEGORY_COLORS[cat.key],
-    categoryKey: cat.key,
+    backgroundColor: CATEGORY_COLORS[key],
+    categoryKey: key,
     stack: 'categories',
     barPercentage: 1,
-    hidden: !!hiddenCategories[cat.key] || visibleCategories.length === 1,
+    hidden: !shownCategories.includes(key) || visibleCategories.length === 1,
   }));
 
   const fieldDatasets = [];
-  for (const category of Payslip.categories) {
-    const [colorStart, colorEnd] = FIELD_COLOR_RANGES[category.key];
-    const activeFields = category.fields.filter((field) => allPayslips.some((p) => p[field]));
+  for (const { key, fields } of Payslip.categories) {
+    const [colorStart, colorEnd] = FIELD_COLOR_RANGES[key];
+    const activeFields = fields.filter((field) => payslips.some((payslip) => payslip[field]));
     activeFields.forEach((field) => {
-      const values = yearlyPayslips.map((p) => Math.abs(p[field] || 0));
-      const ratio = category.fields.length > 1 ? category.fields.indexOf(field) / (category.fields.length - 1) : 0.5;
+      const values = payslips.map((payslip) => Math.abs(payslip[field] || 0));
+      const ratio = fields.length > 1 ? fields.indexOf(field) / (fields.length - 1) : 0.5;
       fieldDatasets.push({
         label: strings.fields[field],
         data: totals.map((total, i) => (total > 0 ? (values[i] / total) * 100 : 0)),
         backgroundColor: interpolateHexColor(colorStart, colorEnd, ratio),
-        categoryKey: category.key,
+        categoryKey: key,
         stack: 'fields',
         barPercentage: 1,
-        hidden: !!hiddenCategories[category.key],
+        hidden: !shownCategories.includes(key),
       });
     });
   }
@@ -53,23 +51,25 @@ function buildBarData(yearlyPayslips, allPayslips, hiddenCategories) {
   return { labels, datasets: [...categoryDatasets, ...fieldDatasets] };
 }
 
-export default function YearlyNormalizedBarChart({ yearlyPayslips, payslips }) {
+export default function NormalizedBarChart({ payslips, labels }) {
   const canvasRef = useRef(null);
   const chartRef = useRef(null);
-  const [hiddenCategories, setHiddenCategories] = useState({});
+  const [shownCategories, setShownCategories] = useState(Payslip.categories.map((cat) => cat.key));
 
-  const toggleCategory = (key) => {
-    setHiddenCategories((prev) => {
-      const next = { ...prev, [key]: !prev[key] };
-      if (Payslip.categories.every((cat) => next[cat.key])) return prev;
-      return next;
+  const toggleCategory = (categoryKey) => {
+    setShownCategories((current) => {
+      if (current.includes(categoryKey)) {
+        if (current.length === 1) return current;
+        return current.filter((key) => key !== categoryKey);
+      }
+      return [...current, categoryKey];
     });
   };
 
   useEffect(() => {
-    if (!canvasRef.current || yearlyPayslips.length === 0) return;
+    if (!canvasRef.current || payslips.length === 0) return;
 
-    const chartData = buildBarData(yearlyPayslips, payslips, hiddenCategories);
+    const chartData = buildBarData(payslips, labels, shownCategories);
 
     if (chartRef.current) {
       chartRef.current.data = chartData;
@@ -119,7 +119,7 @@ export default function YearlyNormalizedBarChart({ yearlyPayslips, payslips }) {
       chartRef.current?.destroy();
       chartRef.current = null;
     };
-  }, [yearlyPayslips, payslips, hiddenCategories]);
+  }, [payslips, labels, shownCategories]);
 
   return (
     <div style={{ width: '100%' }}>
@@ -127,7 +127,7 @@ export default function YearlyNormalizedBarChart({ yearlyPayslips, payslips }) {
         {Payslip.categories.map((cat) => (
           <button
             key={cat.key}
-            className={`chart-legend-btn ${hiddenCategories[cat.key] ? 'inactive' : ''}`}
+            className={`chart-legend-btn ${shownCategories.includes(cat.key) ? '' : 'inactive'}`}
             style={{ '--cat-color': CATEGORY_COLORS[cat.key] }}
             onClick={() => toggleCategory(cat.key)}
           >

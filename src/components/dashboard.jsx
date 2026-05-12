@@ -7,8 +7,7 @@ import CategoryChart from './charts/category-chart.jsx';
 import YearlyTable from './tables/yearly-table.jsx';
 import MonthlyTrendChart from './charts/monthly-trend-chart.jsx';
 import YearlyBarChart from './charts/yearly-bar-chart.jsx';
-import MonthlyNormalizedBarChart from './charts/monthly-normalized-bar-chart.jsx';
-import YearlyNormalizedBarChart from './charts/yearly-normalized-bar-chart.jsx';
+import NormalizedBarChart from './charts/normalized-bar-chart.jsx';
 import DashboardHeader from './dashboard-header.jsx';
 import AddPayslipForm from './add-payslip-form.jsx';
 
@@ -157,12 +156,15 @@ export default function Dashboard() {
           )}
           {view === MONTHLY_BAR && payslipsOfSelectedYear.length > 0 && (
             <div className="chart-container">
-              <MonthlyNormalizedBarChart payslips={payslipsOfSelectedYear} />
+              <NormalizedBarChart
+                payslips={payslipsOfSelectedYear}
+                labels={payslipsOfSelectedYear.map(({ month }) => strings.months[month - 1])}
+              />
             </div>
           )}
           {view === YEARLY_NORM_BAR && payslips && payslips.length > 0 && (
             <div className="chart-container">
-              <YearlyNormalizedBarChart yearlyPayslips={yearlyPayslips} payslips={payslips} />
+              <NormalizedBarChart payslips={yearlyPayslips} labels={yearlyPayslips.map(({ year }) => String(year))} />
             </div>
           )}
           {view === YEARLY && payslips && payslips.length > 0 && (
