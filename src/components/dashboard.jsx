@@ -3,7 +3,6 @@ import { loadPayslipData, addPayslip } from '../data/index.js';
 import { Payslip } from '../data/payslip.js';
 import { strings } from '../i18n/strings.js';
 import PayslipTable from './tables/payslip-table.jsx';
-import CategoryChart from './charts/category-chart.jsx';
 import MonthlyTrendChart from './charts/monthly-trend-chart.jsx';
 import YearlyBarChart from './charts/yearly-bar-chart.jsx';
 import NormalizedBarChart from './charts/normalized-bar-chart.jsx';
@@ -13,7 +12,6 @@ import AddPayslipForm from './add-payslip-form.jsx';
 const VIEW_KEY = 'payslips_view';
 const YEAR_KEY = 'payslips_year';
 const TABLE = 'table';
-const CHART = 'chart';
 const YEARLY = 'yearly';
 const YOY_LINE = 'yoy-line';
 const YOY_BAR = 'yoy-bar';
@@ -73,7 +71,7 @@ export default function Dashboard() {
     setShowForm(false);
   };
 
-  const needsYearSelect = view === TABLE || view === CHART || view === MONTHLY_BAR;
+  const needsYearSelect = view === TABLE || view === MONTHLY_BAR;
 
   return (
     <div className="section">
@@ -84,9 +82,6 @@ export default function Dashboard() {
             <div className="view-toggle">
               <button className={`view-btn ${view === TABLE ? 'active' : ''}`} onClick={() => handleViewChange(TABLE)}>
                 {strings.dashboard.monthly}
-              </button>
-              <button className={`view-btn ${view === CHART ? 'active' : ''}`} onClick={() => handleViewChange(CHART)}>
-                {strings.dashboard.chart}
               </button>
               <button className={`view-btn ${view === MONTHLY_BAR ? 'active' : ''}`} onClick={() => handleViewChange(MONTHLY_BAR)}>
                 {strings.dashboard.monthlyBar}
@@ -106,7 +101,6 @@ export default function Dashboard() {
             </div>
             <select className="view-select" value={view} onChange={(e) => handleViewChange(e.target.value)}>
               <option value={TABLE}>{strings.dashboard.monthly}</option>
-              <option value={CHART}>{strings.dashboard.chart}</option>
               <option value={MONTHLY_BAR}>{strings.dashboard.monthlyBar}</option>
               <option value={YEARLY}>{strings.dashboard.yearly}</option>
               <option value={YOY_BAR}>{strings.dashboard.yoyBar}</option>
@@ -142,11 +136,6 @@ export default function Dashboard() {
                 columnKey="month"
                 showTotal
               />
-            </div>
-          )}
-          {view === CHART && payslipsOfSelectedYear.length > 0 && (
-            <div className="chart-container">
-              <CategoryChart payslips={payslipsOfSelectedYear} />
             </div>
           )}
           {view === YOY_LINE && payslips && payslips.length > 0 && (

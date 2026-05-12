@@ -4,7 +4,6 @@ export const strings = {
   title: 'Munkabér',
   months: Array.from({ length: 12 }, (_unused, monthIndex) => new Date(2000, monthIndex, 1).toLocaleString(LOCALE, { month: 'short' })),
   dashboard: {
-    chart: 'Összefoglaló',
     monthly: 'Havi Részletek',
     refreshButton: 'Frissítés',
     signOut: 'Kijelentkezés',
