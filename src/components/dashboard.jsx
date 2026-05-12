@@ -9,22 +9,22 @@ import NormalizedBarChart from './charts/normalized-bar-chart.jsx';
 import DashboardHeader from './dashboard-header.jsx';
 import AddPayslipForm from './add-payslip-form.jsx';
 
-const VIEW_KEY = 'payslips_view';
-const YEAR_KEY = 'payslips_year';
-const TABLE = 'table';
-const YEARLY = 'yearly';
-const YOY_LINE = 'yoy-line';
-const YOY_BAR = 'yoy-bar';
-const MONTHLY_BAR = 'monthly-bar';
+const STORED_VIEW_KEY = 'payslips_view';
+const STORED_YEAR_KEY = 'payslips_year';
+const MONTHLY_TABLE = 'monthly-table';
+const MONTHLY_NORM_BAR = 'monthly-norm-bar';
+const YEARLY_TABLE = 'yearly-table';
+const YEARLY_BAR = 'yearly-bar';
 const YEARLY_NORM_BAR = 'yearly-norm-bar';
+const TREND_LINE = 'trend-line';
 
 export default function Dashboard() {
   const [payslips, setPayslips] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [view, setView] = useState(() => localStorage.getItem(VIEW_KEY) || TABLE);
+  const [view, setView] = useState(() => localStorage.getItem(STORED_VIEW_KEY) || MONTHLY_TABLE);
   const [selectedYear, setSelectedYear] = useState(() => {
-    const stored = localStorage.getItem(YEAR_KEY);
+    const stored = localStorage.getItem(STORED_YEAR_KEY);
     return stored ? Number(stored) : null;
   });
   const [showForm, setShowForm] = useState(false);
@@ -59,7 +59,7 @@ export default function Dashboard() {
 
   const handleViewChange = (newView) => {
     setView(newView);
-    localStorage.setItem(VIEW_KEY, newView);
+    localStorage.setItem(STORED_VIEW_KEY, newView);
   };
 
   const handleAddPayslip = async (data) => {
@@ -71,7 +71,7 @@ export default function Dashboard() {
     setShowForm(false);
   };
 
-  const needsYearSelect = view === TABLE || view === MONTHLY_BAR;
+  const needsYearSelect = view === MONTHLY_TABLE || view === MONTHLY_NORM_BAR;
 
   return (
     <div className="section">
@@ -80,32 +80,35 @@ export default function Dashboard() {
         <div className="card">
           <div className="card-header">
             <div className="view-toggle">
-              <button className={`view-btn ${view === TABLE ? 'active' : ''}`} onClick={() => handleViewChange(TABLE)}>
-                {strings.dashboard.monthly}
+              <button className={`view-btn ${view === MONTHLY_TABLE ? 'active' : ''}`} onClick={() => handleViewChange(MONTHLY_TABLE)}>
+                {strings.dashboard.viewNames.monthlyTable}
               </button>
-              <button className={`view-btn ${view === MONTHLY_BAR ? 'active' : ''}`} onClick={() => handleViewChange(MONTHLY_BAR)}>
-                {strings.dashboard.monthlyBar}
+              <button
+                className={`view-btn ${view === MONTHLY_NORM_BAR ? 'active' : ''}`}
+                onClick={() => handleViewChange(MONTHLY_NORM_BAR)}
+              >
+                {strings.dashboard.viewNames.monthlyNormBar}
               </button>
-              <button className={`view-btn ${view === YEARLY ? 'active' : ''}`} onClick={() => handleViewChange(YEARLY)}>
-                {strings.dashboard.yearly}
-              </button>
-              <button className={`view-btn ${view === YOY_BAR ? 'active' : ''}`} onClick={() => handleViewChange(YOY_BAR)}>
-                {strings.dashboard.yoyBar}
+              <button className={`view-btn ${view === YEARLY_TABLE ? 'active' : ''}`} onClick={() => handleViewChange(YEARLY_TABLE)}>
+                {strings.dashboard.viewNames.yearlyTable}
               </button>
               <button className={`view-btn ${view === YEARLY_NORM_BAR ? 'active' : ''}`} onClick={() => handleViewChange(YEARLY_NORM_BAR)}>
-                {strings.dashboard.yearlyNormBar}
+                {strings.dashboard.viewNames.yearlyNormBar}
               </button>
-              <button className={`view-btn ${view === YOY_LINE ? 'active' : ''}`} onClick={() => handleViewChange(YOY_LINE)}>
-                {strings.dashboard.yoyLine}
+              <button className={`view-btn ${view === YEARLY_BAR ? 'active' : ''}`} onClick={() => handleViewChange(YEARLY_BAR)}>
+                {strings.dashboard.viewNames.yearlyBar}
+              </button>
+              <button className={`view-btn ${view === TREND_LINE ? 'active' : ''}`} onClick={() => handleViewChange(TREND_LINE)}>
+                {strings.dashboard.viewNames.trendLine}
               </button>
             </div>
             <select className="view-select" value={view} onChange={(e) => handleViewChange(e.target.value)}>
-              <option value={TABLE}>{strings.dashboard.monthly}</option>
-              <option value={MONTHLY_BAR}>{strings.dashboard.monthlyBar}</option>
-              <option value={YEARLY}>{strings.dashboard.yearly}</option>
-              <option value={YOY_BAR}>{strings.dashboard.yoyBar}</option>
-              <option value={YEARLY_NORM_BAR}>{strings.dashboard.yearlyNormBar}</option>
-              <option value={YOY_LINE}>{strings.dashboard.yoyLine}</option>
+              <option value={MONTHLY_TABLE}>{strings.dashboard.viewNames.monthlyTable}</option>
+              <option value={MONTHLY_NORM_BAR}>{strings.dashboard.viewNames.monthlyNormBar}</option>
+              <option value={YEARLY_TABLE}>{strings.dashboard.viewNames.yearlyTable}</option>
+              <option value={YEARLY_NORM_BAR}>{strings.dashboard.viewNames.yearlyNormBar}</option>
+              <option value={YEARLY_BAR}>{strings.dashboard.viewNames.yearlyBar}</option>
+              <option value={TREND_LINE}>{strings.dashboard.viewNames.trendLine}</option>
             </select>
             {needsYearSelect && (
               <select
@@ -114,7 +117,7 @@ export default function Dashboard() {
                 onChange={(event) => {
                   const year = Number(event.target.value);
                   setSelectedYear(year);
-                  localStorage.setItem(YEAR_KEY, year);
+                  localStorage.setItem(STORED_YEAR_KEY, year);
                 }}
               >
                 {years.map((year) => (
@@ -127,7 +130,7 @@ export default function Dashboard() {
           </div>
           {error && <p>{error}</p>}
           {!error && payslips && payslips.length === 0 && <p>{strings.dashboard.noData}</p>}
-          {view === TABLE && payslipsOfSelectedYear.length > 0 && (
+          {view === MONTHLY_TABLE && payslipsOfSelectedYear.length > 0 && (
             <div className="table-wrapper">
               <PayslipTable
                 payslips={payslipsOfSelectedYear}
@@ -138,17 +141,17 @@ export default function Dashboard() {
               />
             </div>
           )}
-          {view === YOY_LINE && payslips && payslips.length > 0 && (
+          {view === TREND_LINE && payslips && payslips.length > 0 && (
             <div className="chart-container">
               <MonthlyTrendChart payslips={payslips} />
             </div>
           )}
-          {view === YOY_BAR && payslips && payslips.length > 0 && (
+          {view === YEARLY_BAR && payslips && payslips.length > 0 && (
             <div className="chart-container">
               <YearlyBarChart yearlyPayslips={yearlyPayslips} />
             </div>
           )}
-          {view === MONTHLY_BAR && payslipsOfSelectedYear.length > 0 && (
+          {view === MONTHLY_NORM_BAR && payslipsOfSelectedYear.length > 0 && (
             <div className="chart-container">
               <NormalizedBarChart
                 payslips={payslipsOfSelectedYear}
@@ -161,7 +164,7 @@ export default function Dashboard() {
               <NormalizedBarChart payslips={yearlyPayslips} labels={yearlyPayslips.map(({ year }) => String(year))} />
             </div>
           )}
-          {view === YEARLY && payslips && payslips.length > 0 && (
+          {view === YEARLY_TABLE && payslips && payslips.length > 0 && (
             <div className="table-wrapper">
               <PayslipTable payslips={yearlyPayslips} columns={years} headers={years.map(String)} columnKey="year" />
             </div>
