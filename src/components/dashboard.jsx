@@ -2,9 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { loadPayslipData, addPayslip } from '../data/index.js';
 import { Payslip } from '../data/payslip.js';
 import { strings } from '../i18n/strings.js';
-import MonthlyTable from './tables/monthly-table.jsx';
+import PayslipTable from './tables/payslip-table.jsx';
 import CategoryChart from './charts/category-chart.jsx';
-import YearlyTable from './tables/yearly-table.jsx';
 import MonthlyTrendChart from './charts/monthly-trend-chart.jsx';
 import YearlyBarChart from './charts/yearly-bar-chart.jsx';
 import NormalizedBarChart from './charts/normalized-bar-chart.jsx';
@@ -136,7 +135,13 @@ export default function Dashboard() {
           {!error && payslips && payslips.length === 0 && <p>{strings.dashboard.noData}</p>}
           {view === TABLE && payslipsOfSelectedYear.length > 0 && (
             <div className="table-wrapper">
-              <MonthlyTable payslips={payslipsOfSelectedYear} />
+              <PayslipTable
+                payslips={payslipsOfSelectedYear}
+                columns={Array.from({ length: 12 }, (_, i) => i + 1)}
+                headers={strings.months}
+                columnKey="month"
+                showTotal
+              />
             </div>
           )}
           {view === CHART && payslipsOfSelectedYear.length > 0 && (
@@ -169,7 +174,7 @@ export default function Dashboard() {
           )}
           {view === YEARLY && payslips && payslips.length > 0 && (
             <div className="table-wrapper">
-              <YearlyTable yearlyPayslips={yearlyPayslips} payslips={payslips} />
+              <PayslipTable payslips={yearlyPayslips} columns={years} headers={years.map(String)} columnKey="year" />
             </div>
           )}
         </div>
