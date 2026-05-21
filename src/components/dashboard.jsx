@@ -6,6 +6,7 @@ import PayslipTable from './tables/payslip-table.jsx';
 import MonthlyTrendChart from './charts/monthly-trend-chart.jsx';
 import YearlyBarChart from './charts/yearly-bar-chart.jsx';
 import NormalizedBarChart from './charts/normalized-bar-chart.jsx';
+import HourlyRateTrendChart from './charts/hourly-rate-trend-chart.jsx';
 import DashboardHeader from './dashboard-header.jsx';
 import AddPayslipForm from './add-payslip-form.jsx';
 
@@ -17,6 +18,7 @@ const YEARLY_TABLE = 'yearly-table';
 const YEARLY_BAR = 'yearly-bar';
 const YEARLY_NORM_BAR = 'yearly-norm-bar';
 const TREND_LINE = 'trend-line';
+const HOURLY_RATE_TREND = 'hourly-rate-trend';
 
 export default function Dashboard() {
   const [payslips, setPayslips] = useState(null);
@@ -74,7 +76,7 @@ export default function Dashboard() {
   };
 
   const handleEditColumn = (monthNum) => {
-    const payslip = payslipsOfSelectedYear.find((p) => p.month === monthNum);
+    const payslip = payslipsOfSelectedYear.find((payslip) => payslip.month === monthNum);
     if (payslip) setEditingPayslip(payslip);
   };
 
@@ -108,6 +110,9 @@ export default function Dashboard() {
               <button className={`view-btn ${view === TREND_LINE ? 'active' : ''}`} onClick={() => handleViewChange(TREND_LINE)}>
                 {strings.dashboard.viewNames.trendLine}
               </button>
+              <button className={`view-btn ${view === HOURLY_RATE_TREND ? 'active' : ''}`} onClick={() => handleViewChange(HOURLY_RATE_TREND)}>
+                {strings.dashboard.viewNames.hourlyRateTrend}
+              </button>
             </div>
             <select className="view-select" value={view} onChange={(e) => handleViewChange(e.target.value)}>
               <option value={MONTHLY_TABLE}>{strings.dashboard.viewNames.monthlyTable}</option>
@@ -116,6 +121,7 @@ export default function Dashboard() {
               <option value={YEARLY_NORM_BAR}>{strings.dashboard.viewNames.yearlyNormBar}</option>
               <option value={YEARLY_BAR}>{strings.dashboard.viewNames.yearlyBar}</option>
               <option value={TREND_LINE}>{strings.dashboard.viewNames.trendLine}</option>
+              <option value={HOURLY_RATE_TREND}>{strings.dashboard.viewNames.hourlyRateTrend}</option>
             </select>
             {needsYearSelect && (
               <select
@@ -154,6 +160,11 @@ export default function Dashboard() {
               <MonthlyTrendChart payslips={payslips} />
             </div>
           )}
+          {view === HOURLY_RATE_TREND && payslips && payslips.length > 0 && (
+            <div className="chart-container">
+              <HourlyRateTrendChart payslips={payslips} />
+            </div>
+          )}
           {view === YEARLY_BAR && payslips && payslips.length > 0 && (
             <div className="chart-container">
               <YearlyBarChart yearlyPayslips={yearlyPayslips} />
@@ -187,7 +198,7 @@ export default function Dashboard() {
               onCancel={() => { setShowForm(false); setEditingPayslip(null); }}
               defaultYear={selectedYear}
               defaultMonth={
-                Array.from({ length: 12 }, (_, i) => i + 1).find((m) => !payslipsOfSelectedYear.some((p) => p.month === m)) || 1
+                Array.from({ length: 12 }, (_, i) => i + 1).find((m) => !payslipsOfSelectedYear.some((payslip) => payslip.month === m)) || 1
               }
               initialData={editingPayslip || undefined}
             />

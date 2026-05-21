@@ -5,7 +5,7 @@ import { Payslip } from '../../data/payslip.js';
 import Row from './row.jsx';
 
 export default function PayslipTable({ payslips, columns, headers, columnKey, showTotal, onEditColumn }) {
-  const columnsWithData = onEditColumn ? new Set(payslips.map((p) => p[columnKey])) : null;
+  const columnsWithData = onEditColumn ? new Set(payslips.map((payslip) => payslip[columnKey])) : null;
 
   return (
     <table className="payslip-table">
@@ -35,15 +35,22 @@ export default function PayslipTable({ payslips, columns, headers, columnKey, sh
         />
         {Payslip.categories.flatMap(({ key, fields, groups }) => {
           const activeFields = fields.filter((field) => payslips.some((payslip) => payslip[field]));
+          const isMonetary = Payslip.monetaryCategories.includes(key);
           return [
-            <Row
-              key={key}
-              className="row-category"
-              label={strings.categories[key]}
-              fieldValues={payslips.map((payslip) => ({ column: payslip[columnKey], value: payslip.sumCategory(key) }))}
-              columns={columns}
-              showTotal={showTotal}
-            />,
+            isMonetary ? (
+              <Row
+                key={key}
+                className="row-category"
+                label={strings.categories[key]}
+                fieldValues={payslips.map((payslip) => ({ column: payslip[columnKey], value: payslip.sumCategory(key) }))}
+                columns={columns}
+                showTotal={showTotal}
+              />
+            ) : (
+              <tr key={key} className="row-category">
+                <td colSpan={columns.length + 1 + (showTotal ? 1 : 0)}>{strings.categories[key]}</td>
+              </tr>
+            ),
             ...(groups
               ? groups.flatMap(({ key: groupKey, fields: groupFields }) => {
                   const activeGroupFields = groupFields.filter((field) => activeFields.includes(field));

@@ -26,6 +26,10 @@ const categories = [
     key: 'deductions',
     fields: ['tax_advance', 'other_deductions', 'social_security', 'in_kind_pay_net'],
   },
+  {
+    key: 'workTime',
+    fields: ['work_days', 'calendar_days', 'work_hours', 'standby_hours'],
+  },
 ];
 
 for (const category of categories) {
@@ -46,8 +50,12 @@ export class Payslip {
     return category ? this.sum(category.fields) : 0;
   }
 
+  static monetaryCategories = ['income', 'cafeteria', 'deductions'];
+
   netPay() {
-    return categories.reduce((sum, category) => sum + this.sum(category.fields), 0);
+    return categories
+      .filter(({ key }) => Payslip.monetaryCategories.includes(key))
+      .reduce((sum, { fields }) => sum + this.sum(fields), 0);
   }
 
   static updateSortIndices(payslips) {

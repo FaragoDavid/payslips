@@ -12,6 +12,11 @@ export function formatCurrency(value) {
   return formatter.format(value) + ' Ft';
 }
 
+export function formatHourlyRate(value) {
+  if (value == null) return '-';
+  return formatter.format(value) + ' Ft/óra';
+}
+
 export function formatCell(value, negative) {
   if (value == null || value === 0) return '-';
   const display = negative ? -value : value;

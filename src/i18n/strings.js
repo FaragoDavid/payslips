@@ -16,6 +16,7 @@ export const strings = {
       yearlyNormBar: 'Éves arányok',
       yearlyBar: 'Éves összehasonlítás',
       trendLine: 'Éves trend',
+      hourlyRateTrend: 'Órabér trend',
     },
   },
   table: {
@@ -39,6 +40,10 @@ export const strings = {
     social_security: 'Társ. bizt. járulék',
     in_kind_pay_net: 'Természetben adott bér nettó',
     szep_card_accommodation: 'Szép kártya szálláshely OTP',
+    work_days: 'Munkanap',
+    calendar_days: 'Naptári nap',
+    work_hours: 'Munkaóra',
+    standby_hours: 'Készenlét',
   },
   groups: {
     basePay: 'Alapbér',
@@ -49,6 +54,7 @@ export const strings = {
     income: 'Bevétel',
     deductions: 'Levonások',
     cafeteria: 'Cafeteria',
+    workTime: 'Munkaidő',
   },
   addForm: {
     addButton: 'Hozzáadás',

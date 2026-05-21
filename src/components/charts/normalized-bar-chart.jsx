@@ -9,19 +9,20 @@ Chart.register(BarController, BarElement, CategoryScale, LinearScale, Tooltip);
 
 const DATALABEL_FONT_SIZE = 11;
 const MIN_LABEL_PERCENTAGE = 5;
+const chartCategories = Payslip.categories.filter(({ key }) => Payslip.monetaryCategories.includes(key));
 
 function buildBarData(payslips, labels, shownCategories) {
-  const visibleCategories = Payslip.categories.filter((cat) => shownCategories.includes(cat.key));
-  const categoryValues = Payslip.categories.map((cat) => payslips.map((p) => Math.abs(p.sumCategory(cat.key))));
+  const visibleCategories = chartCategories.filter(({ key }) => shownCategories.includes(key));
+  const categoryValues = chartCategories.map(({ key }) => payslips.map((payslip) => Math.abs(payslip.sumCategory(key))));
   const totals = payslips.map((_, i) =>
     visibleCategories.reduce((sum, category) => {
-      return sum + categoryValues[Payslip.categories.indexOf(category)][i];
+      return sum + categoryValues[chartCategories.indexOf(category)][i];
     }, 0),
   );
 
-  const categoryDatasets = Payslip.categories.map(({ key }, ci) => ({
+  const categoryDatasets = chartCategories.map(({ key }, categoryIndex) => ({
     label: strings.categories[key],
-    data: totals.map((total, i) => (total > 0 ? (categoryValues[ci][i] / total) * 100 : 0)),
+    data: totals.map((total, i) => (total > 0 ? (categoryValues[categoryIndex][i] / total) * 100 : 0)),
     backgroundColor: CATEGORY_COLORS[key],
     categoryKey: key,
     stack: 'categories',
@@ -30,7 +31,7 @@ function buildBarData(payslips, labels, shownCategories) {
   }));
 
   const fieldDatasets = [];
-  for (const { key, fields } of Payslip.categories) {
+  for (const { key, fields } of chartCategories) {
     const [colorStart, colorEnd] = FIELD_COLOR_RANGES[key];
     const activeFields = fields.filter((field) => payslips.some((payslip) => payslip[field]));
     activeFields.forEach((field) => {
@@ -60,10 +61,10 @@ export default function NormalizedBarChart({ payslips, labels }) {
     const stored = localStorage.getItem(STORED_CATEGORIES_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);
-      const valid = parsed.filter((key) => Payslip.categories.some((cat) => cat.key === key));
+      const valid = parsed.filter((key) => chartCategories.some(({ key: categoryKey }) => categoryKey === key));
       if (valid.length > 0) return valid;
     }
-    return Payslip.categories.map((cat) => cat.key);
+    return chartCategories.map(({ key }) => key);
   });
 
   const toggleCategory = (categoryKey) => {
@@ -138,14 +139,14 @@ export default function NormalizedBarChart({ payslips, labels }) {
   return (
     <div style={{ width: '100%' }}>
       <div className="chart-legend">
-        {Payslip.categories.map((cat) => (
+        {chartCategories.map(({ key }) => (
           <button
-            key={cat.key}
-            className={`chart-legend-btn ${shownCategories.includes(cat.key) ? '' : 'inactive'}`}
-            style={{ '--cat-color': CATEGORY_COLORS[cat.key] }}
-            onClick={() => toggleCategory(cat.key)}
+            key={key}
+            className={`chart-legend-btn ${shownCategories.includes(key) ? '' : 'inactive'}`}
+            style={{ '--cat-color': CATEGORY_COLORS[key] }}
+            onClick={() => toggleCategory(key)}
           >
-            {strings.categories[cat.key]}
+            {strings.categories[key]}
           </button>
         ))}
       </div>
