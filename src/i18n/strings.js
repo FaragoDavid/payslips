@@ -17,6 +17,7 @@ export const strings = {
       yearlyBar: 'Éves összehasonlítás',
       trendLine: 'Éves trend',
       hourlyRateTrend: 'Órabér trend',
+      standbyHourlyRate: 'Készenléti órabér',
     },
   },
   table: {

@@ -7,6 +7,7 @@ import MonthlyTrendChart from './charts/monthly-trend-chart.jsx';
 import YearlyBarChart from './charts/yearly-bar-chart.jsx';
 import NormalizedBarChart from './charts/normalized-bar-chart.jsx';
 import HourlyRateTrendChart from './charts/hourly-rate-trend-chart.jsx';
+import StandbyRatioChart from './charts/standby-ratio-chart.jsx';
 import DashboardHeader from './dashboard-header.jsx';
 import AddPayslipForm from './add-payslip-form.jsx';
 
@@ -19,6 +20,7 @@ const YEARLY_BAR = 'yearly-bar';
 const YEARLY_NORM_BAR = 'yearly-norm-bar';
 const TREND_LINE = 'trend-line';
 const HOURLY_RATE_TREND = 'hourly-rate-trend';
+const STANDBY_HOURLY_RATE = 'standby-hourly-rate';
 
 export default function Dashboard() {
   const [payslips, setPayslips] = useState(null);
@@ -113,6 +115,9 @@ export default function Dashboard() {
               <button className={`view-btn ${view === HOURLY_RATE_TREND ? 'active' : ''}`} onClick={() => handleViewChange(HOURLY_RATE_TREND)}>
                 {strings.dashboard.viewNames.hourlyRateTrend}
               </button>
+              <button className={`view-btn ${view === STANDBY_HOURLY_RATE ? 'active' : ''}`} onClick={() => handleViewChange(STANDBY_HOURLY_RATE)}>
+                {strings.dashboard.viewNames.standbyHourlyRate}
+              </button>
             </div>
             <select className="view-select" value={view} onChange={(e) => handleViewChange(e.target.value)}>
               <option value={MONTHLY_TABLE}>{strings.dashboard.viewNames.monthlyTable}</option>
@@ -122,6 +127,7 @@ export default function Dashboard() {
               <option value={YEARLY_BAR}>{strings.dashboard.viewNames.yearlyBar}</option>
               <option value={TREND_LINE}>{strings.dashboard.viewNames.trendLine}</option>
               <option value={HOURLY_RATE_TREND}>{strings.dashboard.viewNames.hourlyRateTrend}</option>
+              <option value={STANDBY_HOURLY_RATE}>{strings.dashboard.viewNames.standbyHourlyRate}</option>
             </select>
             {needsYearSelect && (
               <select
@@ -163,6 +169,11 @@ export default function Dashboard() {
           {view === HOURLY_RATE_TREND && payslips && payslips.length > 0 && (
             <div className="chart-container">
               <HourlyRateTrendChart payslips={payslips} />
+            </div>
+          )}
+          {view === STANDBY_HOURLY_RATE && payslips && payslips.length > 0 && (
+            <div className="chart-container">
+              <StandbyRatioChart payslips={payslips} />
             </div>
           )}
           {view === YEARLY_BAR && payslips && payslips.length > 0 && (
