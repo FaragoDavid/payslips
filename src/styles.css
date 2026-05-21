@@ -291,6 +291,7 @@ thead th {
   position: sticky;
   top: 0;
   border-bottom: 2px solid #ddd;
+  white-space: nowrap;
 }
 
 thead th:first-child,
@@ -303,6 +304,25 @@ tbody td:first-child {
 thead th:first-child {
   text-align: left;
   z-index: 2;
+}
+
+.th-edit-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #aaa;
+  padding: 0 0 0 3px;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+.th-edit-btn:hover {
+  color: #2d3561;
+}
+
+.form-readonly {
+  font-weight: 600;
+  color: #333;
 }
 
 tbody td {

@@ -4,10 +4,11 @@ import { strings } from '../i18n/strings.js';
 
 const allFields = Payslip.categories.flatMap((c) => c.fields);
 
-export default function AddPayslipForm({ onSave, onCancel, defaultYear, defaultMonth }) {
-  const [year, setYear] = useState(defaultYear || new Date().getFullYear());
-  const [month, setMonth] = useState(defaultMonth || 1);
-  const [fields, setFields] = useState(() => Object.fromEntries(allFields.map((f) => [f, ''])));
+export default function AddPayslipForm({ onSave, onCancel, defaultYear, defaultMonth, initialData }) {
+  const isEditing = !!initialData;
+  const [year, setYear] = useState(initialData?.year ?? defaultYear ?? new Date().getFullYear());
+  const [month, setMonth] = useState(initialData?.month ?? defaultMonth ?? 1);
+  const [fields, setFields] = useState(() => Object.fromEntries(allFields.map((f) => [f, initialData?.[f] ?? ''])));
 
   const handleFieldChange = (key, value) => {
     setFields((prev) => ({ ...prev, [key]: value }));
@@ -28,17 +29,25 @@ export default function AddPayslipForm({ onSave, onCancel, defaultYear, defaultM
       <form id="add-payslip-form" className="add-payslip-form" onSubmit={handleSubmit}>
         <div className="form-row">
           <label>{strings.addForm.year}</label>
-          <input type="number" value={year} onChange={(e) => setYear(Number(e.target.value))} required />
+          {isEditing ? (
+            <span className="form-readonly">{year}</span>
+          ) : (
+            <input type="number" value={year} onChange={(e) => setYear(Number(e.target.value))} required />
+          )}
         </div>
         <div className="form-row">
           <label>{strings.addForm.month}</label>
-          <select value={month} onChange={(e) => setMonth(Number(e.target.value))}>
-            {strings.months.map((name, i) => (
-              <option key={i + 1} value={i + 1}>
-                {name}
-              </option>
-            ))}
-          </select>
+          {isEditing ? (
+            <span className="form-readonly">{strings.months[month - 1]}</span>
+          ) : (
+            <select value={month} onChange={(e) => setMonth(Number(e.target.value))}>
+              {strings.months.map((name, i) => (
+                <option key={i + 1} value={i + 1}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
         {Payslip.categories.map((category) => (
           <fieldset key={category.key}>

@@ -28,6 +28,7 @@ export default function Dashboard() {
     return stored ? Number(stored) : null;
   });
   const [showForm, setShowForm] = useState(false);
+  const [editingPayslip, setEditingPayslip] = useState(null);
 
   const fetchData = useCallback(async (forceRefresh = false) => {
     setLoading(true);
@@ -69,13 +70,19 @@ export default function Dashboard() {
       return [...filtered, newPayslip].sort((a, b) => a.year - b.year || a.month - b.month);
     });
     setShowForm(false);
+    setEditingPayslip(null);
+  };
+
+  const handleEditColumn = (monthNum) => {
+    const payslip = payslipsOfSelectedYear.find((p) => p.month === monthNum);
+    if (payslip) setEditingPayslip(payslip);
   };
 
   const needsYearSelect = view === MONTHLY_TABLE || view === MONTHLY_NORM_BAR;
 
   return (
     <div className="section">
-      <DashboardHeader onAdd={() => setShowForm(true)} onRefresh={() => fetchData(true)} loading={loading} addDisabled={showForm} />
+      <DashboardHeader onAdd={() => setShowForm(true)} onRefresh={() => fetchData(true)} loading={loading} addDisabled={showForm || !!editingPayslip} />
       <div className="cards-container">
         <div className="card">
           <div className="card-header">
@@ -138,6 +145,7 @@ export default function Dashboard() {
                 headers={strings.months}
                 columnKey="month"
                 showTotal
+                onEditColumn={handleEditColumn}
               />
             </div>
           )}
@@ -171,16 +179,17 @@ export default function Dashboard() {
           )}
         </div>
       </div>
-      {showForm && (
-        <div className="popover-overlay" onClick={() => setShowForm(false)}>
+      {(showForm || editingPayslip) && (
+        <div className="popover-overlay" onClick={() => { setShowForm(false); setEditingPayslip(null); }}>
           <div className="popover" onClick={(e) => e.stopPropagation()}>
             <AddPayslipForm
               onSave={handleAddPayslip}
-              onCancel={() => setShowForm(false)}
+              onCancel={() => { setShowForm(false); setEditingPayslip(null); }}
               defaultYear={selectedYear}
               defaultMonth={
                 Array.from({ length: 12 }, (_, i) => i + 1).find((m) => !payslipsOfSelectedYear.some((p) => p.month === m)) || 1
               }
+              initialData={editingPayslip || undefined}
             />
           </div>
         </div>

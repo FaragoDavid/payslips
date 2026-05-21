@@ -1,16 +1,26 @@
 import React from 'react';
+import { Pencil } from 'lucide-react';
 import { strings } from '../../i18n/strings.js';
 import { Payslip } from '../../data/payslip.js';
 import Row from './row.jsx';
 
-export default function PayslipTable({ payslips, columns, headers, columnKey, showTotal }) {
+export default function PayslipTable({ payslips, columns, headers, columnKey, showTotal, onEditColumn }) {
+  const columnsWithData = onEditColumn ? new Set(payslips.map((p) => p[columnKey])) : null;
+
   return (
     <table className="payslip-table">
       <thead>
         <tr>
           <th></th>
-          {headers.map((header, index) => (
-            <th key={index}>{header}</th>
+          {columns.map((column, index) => (
+            <th key={index}>
+              {headers[index]}
+              {onEditColumn && columnsWithData.has(column) && (
+                <button className="th-edit-btn" onClick={() => onEditColumn(column)}>
+                  <Pencil size={11} />
+                </button>
+              )}
+            </th>
           ))}
           {showTotal && <th className="col-total">Total</th>}
         </tr>
