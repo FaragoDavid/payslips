@@ -1,5 +1,6 @@
 import { Payslip } from './payslip.js';
 import { CACHE_KEY } from './store.jsx';
+import { fetchPayslipsFromFirestore, addPayslipToFirestore } from './firestore.js';
 
 function cacheRead() {
   const raw = localStorage.getItem(CACHE_KEY);
@@ -18,14 +19,12 @@ export const remoteStore = {
     } else {
       localStorage.removeItem(CACHE_KEY);
     }
-    const { fetchPayslipsFromFirestore } = await import('./firestore.js');
     const records = await fetchPayslipsFromFirestore();
     cacheWrite(records);
     return Payslip.hydrate(records);
   },
 
   async addPayslip(data) {
-    const { addPayslipToFirestore } = await import('./firestore.js');
     await addPayslipToFirestore(data);
     const records = cacheRead() ?? [];
     const idx = records.findIndex((p) => p.year === data.year && p.month === data.month);
