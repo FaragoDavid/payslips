@@ -1,15 +1,16 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { loadPayslipData, addPayslip } from '../data/index.js';
+import React, { useCallback, useEffect, useState } from 'react';
+
 import { Payslip } from '../data/payslip.js';
+import { useStore } from '../data/store.jsx';
 import { strings } from '../i18n/strings.js';
-import PayslipTable from './tables/payslip-table.jsx';
-import MonthlyTrendChart from './charts/monthly-trend-chart.jsx';
-import YearlyBarChart from './charts/yearly-bar-chart.jsx';
-import NormalizedBarChart from './charts/normalized-bar-chart.jsx';
-import HourlyRateTrendChart from './charts/hourly-rate-trend-chart.jsx';
-import StandbyRatioChart from './charts/standby-ratio-chart.jsx';
-import DashboardHeader from './dashboard-header.jsx';
 import AddPayslipForm from './add-payslip-form.jsx';
+import HourlyRateTrendChart from './charts/hourly-rate-trend-chart.jsx';
+import MonthlyTrendChart from './charts/monthly-trend-chart.jsx';
+import NormalizedBarChart from './charts/normalized-bar-chart.jsx';
+import StandbyRatioChart from './charts/standby-ratio-chart.jsx';
+import YearlyBarChart from './charts/yearly-bar-chart.jsx';
+import DashboardHeader from './dashboard-header.jsx';
+import PayslipTable from './tables/payslip-table.jsx';
 
 const STORED_VIEW_KEY = 'payslips_view';
 const STORED_YEAR_KEY = 'payslips_year';
@@ -23,6 +24,7 @@ const HOURLY_RATE_TREND = 'hourly-rate-trend';
 const STANDBY_HOURLY_RATE = 'standby-hourly-rate';
 
 export default function Dashboard() {
+  const store = useStore();
   const [payslips, setPayslips] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -38,7 +40,7 @@ export default function Dashboard() {
     setLoading(true);
     setError(null);
     try {
-      const payslips = await loadPayslipData(forceRefresh);
+      const payslips = await store.readPayslips(forceRefresh);
       setPayslips(payslips || []);
     } catch (err) {
       console.error('Error loading payslip data:', err);
@@ -68,7 +70,7 @@ export default function Dashboard() {
   };
 
   const handleAddPayslip = async (data) => {
-    const newPayslip = await addPayslip(data);
+    const newPayslip = await store.addPayslip(data);
     setPayslips((prev) => {
       const filtered = prev.filter(({ year, month }) => year !== data.year || month !== data.month);
       return [...filtered, newPayslip].sort((a, b) => a.year - b.year || a.month - b.month);
@@ -86,7 +88,12 @@ export default function Dashboard() {
 
   return (
     <div className="section">
-      <DashboardHeader onAdd={() => setShowForm(true)} onRefresh={() => fetchData(true)} loading={loading} addDisabled={showForm || !!editingPayslip} />
+      <DashboardHeader
+        onAdd={() => setShowForm(true)}
+        onRefresh={() => fetchData(true)}
+        loading={loading}
+        addDisabled={showForm || !!editingPayslip}
+      />
       <div className="cards-container">
         <div className="card">
           <div className="card-header">
@@ -112,10 +119,16 @@ export default function Dashboard() {
               <button className={`view-btn ${view === TREND_LINE ? 'active' : ''}`} onClick={() => handleViewChange(TREND_LINE)}>
                 {strings.dashboard.viewNames.trendLine}
               </button>
-              <button className={`view-btn ${view === HOURLY_RATE_TREND ? 'active' : ''}`} onClick={() => handleViewChange(HOURLY_RATE_TREND)}>
+              <button
+                className={`view-btn ${view === HOURLY_RATE_TREND ? 'active' : ''}`}
+                onClick={() => handleViewChange(HOURLY_RATE_TREND)}
+              >
                 {strings.dashboard.viewNames.hourlyRateTrend}
               </button>
-              <button className={`view-btn ${view === STANDBY_HOURLY_RATE ? 'active' : ''}`} onClick={() => handleViewChange(STANDBY_HOURLY_RATE)}>
+              <button
+                className={`view-btn ${view === STANDBY_HOURLY_RATE ? 'active' : ''}`}
+                onClick={() => handleViewChange(STANDBY_HOURLY_RATE)}
+              >
                 {strings.dashboard.viewNames.standbyHourlyRate}
               </button>
             </div>
@@ -202,11 +215,20 @@ export default function Dashboard() {
         </div>
       </div>
       {(showForm || editingPayslip) && (
-        <div className="popover-overlay" onClick={() => { setShowForm(false); setEditingPayslip(null); }}>
+        <div
+          className="popover-overlay"
+          onClick={() => {
+            setShowForm(false);
+            setEditingPayslip(null);
+          }}
+        >
           <div className="popover" onClick={(e) => e.stopPropagation()}>
             <AddPayslipForm
               onSave={handleAddPayslip}
-              onCancel={() => { setShowForm(false); setEditingPayslip(null); }}
+              onCancel={() => {
+                setShowForm(false);
+                setEditingPayslip(null);
+              }}
               defaultYear={selectedYear}
               defaultMonth={
                 Array.from({ length: 12 }, (_, i) => i + 1).find((m) => !payslipsOfSelectedYear.some((payslip) => payslip.month === m)) || 1

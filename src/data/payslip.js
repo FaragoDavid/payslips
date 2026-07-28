@@ -53,9 +53,13 @@ export class Payslip {
   static monetaryCategories = ['income', 'cafeteria', 'deductions'];
 
   netPay() {
-    return categories
-      .filter(({ key }) => Payslip.monetaryCategories.includes(key))
-      .reduce((sum, { fields }) => sum + this.sum(fields), 0);
+    return categories.filter(({ key }) => Payslip.monetaryCategories.includes(key)).reduce((sum, { fields }) => sum + this.sum(fields), 0);
+  }
+
+  static hydrate(records) {
+    const payslips = records.map((r) => new Payslip(r));
+    Payslip.updateSortIndices(payslips);
+    return payslips;
   }
 
   static updateSortIndices(payslips) {
