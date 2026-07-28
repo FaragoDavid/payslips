@@ -1,4 +1,3 @@
-import React from 'react';
 import { useAuth } from './services/auth.js';
 import Login from './components/login.jsx';
 import Dashboard from './components/dashboard.jsx';

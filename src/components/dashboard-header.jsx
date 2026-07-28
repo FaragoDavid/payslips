@@ -1,4 +1,3 @@
-import React from 'react';
 import { Plus, RefreshCw } from 'lucide-react';
 import { strings } from '../i18n/strings.js';
 

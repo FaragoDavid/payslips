@@ -1,4 +1,4 @@
-import React from 'react';
+import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import App from './app.jsx';
@@ -10,7 +10,9 @@ import './styles.css';
 const store = import.meta.env.DEV ? localStore : remoteStore;
 
 createRoot(document.getElementById('root')).render(
-  <StoreProvider store={store}>
-    <App />
-  </StoreProvider>,
+  <StrictMode>
+    <StoreProvider store={store}>
+      <App />
+    </StoreProvider>
+  </StrictMode>,
 );
