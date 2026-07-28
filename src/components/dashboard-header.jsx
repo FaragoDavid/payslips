@@ -1,17 +1,8 @@
 import React from 'react';
-import { Plus, RefreshCw, LogOut } from 'lucide-react';
-import { signOut } from '../services/auth.js';
+import { Plus, RefreshCw } from 'lucide-react';
 import { strings } from '../i18n/strings.js';
 
 export default function DashboardHeader({ onAdd, onRefresh, loading, addDisabled }) {
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-    } catch (err) {
-      console.error('Error during sign-out:', err);
-    }
-  };
-
   return (
     <div className="header">
       <div>
@@ -25,10 +16,6 @@ export default function DashboardHeader({ onAdd, onRefresh, loading, addDisabled
         <button className="btn btn-small btn-refresh" onClick={onRefresh} disabled={loading}>
           <RefreshCw className="btn-icon" size={18} />
           <span className="btn-label">{loading ? strings.dashboard.loading : strings.dashboard.refreshButton}</span>
-        </button>
-        <button className="btn btn-small" onClick={handleSignOut}>
-          <LogOut className="btn-icon" size={18} />
-          <span className="btn-label">{strings.dashboard.signOut}</span>
         </button>
       </div>
     </div>

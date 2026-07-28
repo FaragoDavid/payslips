@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut as firebaseSignOut } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup } from 'firebase/auth';
 import { app } from './firebase.js';
 
 const auth = getAuth(app);
@@ -21,8 +21,4 @@ export function useAuth() {
 
 export async function signIn() {
   await signInWithPopup(auth, new GoogleAuthProvider());
-}
-
-export async function signOut() {
-  await firebaseSignOut(auth);
 }

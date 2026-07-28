@@ -5,7 +5,6 @@ export const strings = {
   months: Array.from({ length: 12 }, (_unused, monthIndex) => new Date(2000, monthIndex, 1).toLocaleString(LOCALE, { month: 'short' })),
   dashboard: {
     refreshButton: 'Frissítés',
-    signOut: 'Kijelentkezés',
     noData: 'Nincs elérhető adat. Adj hozzá fizetési adatokat a Firestore-ban.',
     errorMessage: 'Hiba az adatok betöltése során.',
     loading: 'Betöltés...',
