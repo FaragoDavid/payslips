@@ -23,3 +23,12 @@ export function formatCell(value, negative) {
   const formatted = formatter.format(display);
   return negative ? `<span class="negative">${formatted}</span>` : formatted;
 }
+
+export function formatInputValue(raw) {
+  const num = parseInt(raw, 10);
+  return raw === '' || isNaN(num) ? raw : num.toLocaleString(LOCALE);
+}
+
+export function parseInputValue(formatted) {
+  return String(formatted).replace(/\s/g, '');
+}

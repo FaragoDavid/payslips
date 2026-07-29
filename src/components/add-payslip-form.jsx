@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Payslip } from '../data/payslip.js';
 import { strings } from '../i18n/strings.js';
+import { formatInputValue, parseInputValue } from '../utils/format.js';
 
 const allFields = Payslip.categories.flatMap((c) => c.fields);
 
@@ -8,17 +9,23 @@ export default function AddPayslipForm({ onSave, onCancel, defaultYear, defaultM
   const isEditing = !!initialData;
   const [year, setYear] = useState(initialData?.year ?? defaultYear ?? new Date().getFullYear());
   const [month, setMonth] = useState(initialData?.month ?? defaultMonth ?? 1);
-  const [fields, setFields] = useState(() => Object.fromEntries(allFields.map((f) => [f, initialData?.[f] ?? ''])));
+  const [fields, setFields] = useState(() =>
+    Object.fromEntries(allFields.map((f) => [f, initialData?.[f] != null ? formatInputValue(String(initialData[f])) : ''])),
+  );
 
   const handleFieldChange = (key, value) => {
-    setFields((prev) => ({ ...prev, [key]: value }));
+    setFields((prev) => ({ ...prev, [key]: parseInputValue(value) }));
+  };
+
+  const handleFieldBlur = (key) => {
+    setFields((prev) => ({ ...prev, [key]: formatInputValue(prev[key]) }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const data = { year, month };
     for (const key of allFields) {
-      const val = parseFloat(fields[key]);
+      const val = parseFloat(parseInputValue(fields[key]));
       if (!isNaN(val) && val !== 0) data[key] = val;
     }
     onSave(data);
@@ -60,10 +67,11 @@ export default function AddPayslipForm({ onSave, onCancel, defaultYear, defaultM
                       <div className="form-row" key={field}>
                         <label>{strings.fields[field]}</label>
                         <input
-                          type="number"
-                          step="any"
+                          type="text"
+                          inputMode="numeric"
                           value={fields[field]}
                           onChange={(e) => handleFieldChange(field, e.target.value)}
+                          onBlur={() => handleFieldBlur(field)}
                           placeholder="0"
                           autoFocus={field === allFields[0]}
                         />
@@ -75,10 +83,11 @@ export default function AddPayslipForm({ onSave, onCancel, defaultYear, defaultM
                   <div className="form-row" key={field}>
                     <label>{strings.fields[field]}</label>
                     <input
-                      type="number"
-                      step="any"
+                      type="text"
+                      inputMode="numeric"
                       value={fields[field]}
                       onChange={(e) => handleFieldChange(field, e.target.value)}
+                      onBlur={() => handleFieldBlur(field)}
                       placeholder="0"
                     />
                   </div>
