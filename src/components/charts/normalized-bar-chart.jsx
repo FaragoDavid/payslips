@@ -11,7 +11,7 @@ const DATALABEL_FONT_SIZE = 11;
 const MIN_LABEL_PERCENTAGE = 5;
 const chartCategories = Payslip.categories.filter(({ key }) => Payslip.monetaryCategories.includes(key));
 
-function buildBarData(payslips, labels, shownCategories) {
+function buildBarData(payslips, labels, shownCategories, highlightedFieldRef) {
   const visibleCategories = chartCategories.filter(({ key }) => shownCategories.includes(key));
   const categoryValues = chartCategories.map(({ key }) => payslips.map((payslip) => Math.abs(payslip.sumCategory(key))));
   const totals = payslips.map((_, i) =>
@@ -42,7 +42,10 @@ function buildBarData(payslips, labels, shownCategories) {
       fieldDatasets.push({
         label: strings.fields[field],
         data: totals.map((total, i) => (total > 0 ? (values[i] / total) * 100 : 0)),
-        backgroundColor: FIELD_COLORS[field],
+        backgroundColor: () => {
+          const highlighted = highlightedFieldRef.current;
+          return highlighted && highlighted !== field ? FIELD_COLORS[field] + '33' : FIELD_COLORS[field];
+        },
         categoryKey: key,
         stack: 'fields',
         barPercentage: 1,
@@ -59,6 +62,9 @@ const STORED_CATEGORIES_KEY = 'payslips_shown_categories';
 export default function NormalizedBarChart({ payslips, labels }) {
   const canvasRef = useRef(null);
   const chartRef = useRef(null);
+  const highlightedFieldRef = useRef(null);
+  const lockedFieldRef = useRef(null);
+  const [highlightedField, setHighlightedField] = useState(null);
   const [shownCategories, setShownCategories] = useState(() => {
     const stored = localStorage.getItem(STORED_CATEGORIES_KEY);
     if (stored) {
@@ -86,7 +92,7 @@ export default function NormalizedBarChart({ payslips, labels }) {
   useEffect(() => {
     if (!canvasRef.current || payslips.length === 0) return;
 
-    const chartData = buildBarData(payslips, labels, shownCategories);
+    const chartData = buildBarData(payslips, labels, shownCategories, highlightedFieldRef);
 
     if (chartRef.current) {
       chartRef.current.data = chartData;
@@ -113,7 +119,11 @@ export default function NormalizedBarChart({ payslips, labels }) {
             anchor: 'center',
             align: 'center',
             font: { size: DATALABEL_FONT_SIZE, weight: 'bold' },
-            color: (context) => labelColor(context.dataset.backgroundColor),
+            color: (context) =>
+              labelColor(
+                FIELD_COLORS[Object.keys(strings.fields).find((f) => strings.fields[f] === context.dataset.label)] ||
+                  context.dataset.backgroundColor,
+              ),
             display: (context) => context.dataset.data[context.dataIndex] >= MIN_LABEL_PERCENTAGE,
             formatter: (value) => value.toFixed(0) + '%',
           },
@@ -138,6 +148,39 @@ export default function NormalizedBarChart({ payslips, labels }) {
     };
   }, [payslips, labels, shownCategories]);
 
+  const highlightField = (field) => {
+    highlightedFieldRef.current = field;
+    chartRef.current?.update('none');
+  };
+
+  const clearHighlight = () => {
+    highlightedFieldRef.current = lockedFieldRef.current;
+    chartRef.current?.update('none');
+  };
+
+  const toggleHighlight = (field) => {
+    if (highlightedField === field) {
+      lockedFieldRef.current = null;
+      highlightedFieldRef.current = null;
+      setHighlightedField(null);
+    } else {
+      lockedFieldRef.current = field;
+      highlightedFieldRef.current = field;
+      setHighlightedField(field);
+    }
+    chartRef.current?.update('none');
+  };
+
+  const visibleFields = chartCategories
+    .filter(({ key }) => shownCategories.includes(key))
+    .flatMap(({ key, fields }) => {
+      const activeFields = fields.filter((field) => payslips.some((payslip) => payslip[field]));
+      const avgByField = Object.fromEntries(
+        activeFields.map((field) => [field, payslips.reduce((sum, p) => sum + Math.abs(p[field] || 0), 0) / payslips.length]),
+      );
+      return activeFields.sort((a, b) => avgByField[b] - avgByField[a]);
+    });
+
   return (
     <div style={{ width: '100%' }}>
       <div className="chart-legend">
@@ -153,6 +196,20 @@ export default function NormalizedBarChart({ payslips, labels }) {
         ))}
       </div>
       <canvas ref={canvasRef} />
+      <div className="chart-field-legend">
+        {visibleFields.map((field) => (
+          <span
+            key={field}
+            className={`chart-field-legend-item ${highlightedField === field ? 'active' : ''}`}
+            onMouseEnter={() => !lockedFieldRef.current && highlightField(field)}
+            onMouseLeave={() => !lockedFieldRef.current && clearHighlight()}
+            onClick={() => toggleHighlight(field)}
+          >
+            <span className="chart-field-legend-swatch" style={{ backgroundColor: FIELD_COLORS[field] }} />
+            {strings.fields[field]}
+          </span>
+        ))}
+      </div>
     </div>
   );
 }

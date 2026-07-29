@@ -5,8 +5,11 @@ const parseHex = (hex) => [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 
 export function interpolateHexColor(hex1, hex2, ratio) {
   const [r1, g1, b1] = parseHex(hex1);
   const [r2, g2, b2] = parseHex(hex2);
-  const lerp = (a, b) => Math.round(a + (b - a) * ratio);
-  return `rgb(${lerp(r1, r2)},${lerp(g1, g2)},${lerp(b1, b2)})`;
+  const lerp = (a, b) =>
+    Math.round(a + (b - a) * ratio)
+      .toString(16)
+      .padStart(2, '0');
+  return `#${lerp(r1, r2)}${lerp(g1, g2)}${lerp(b1, b2)}`;
 }
 
 export function labelColor(bgHex) {
