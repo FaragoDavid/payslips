@@ -233,6 +233,11 @@ export default function Dashboard() {
               defaultMonth={
                 Array.from({ length: 12 }, (_, i) => i + 1).find((m) => !payslipsOfSelectedYear.some((payslip) => payslip.month === m)) || 1
               }
+              takenMonths={payslips.reduce((acc, { year, month }) => {
+                if (!acc[year]) acc[year] = new Set();
+                acc[year].add(month);
+                return acc;
+              }, {})}
               initialData={editingPayslip || undefined}
             />
           </div>

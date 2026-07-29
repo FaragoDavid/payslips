@@ -6,7 +6,7 @@ import { formatInputValue, parseInputValue } from '../utils/format.js';
 const allFields = Payslip.categories.flatMap((c) => c.fields);
 const deductionFields = new Set(Payslip.categories.find((c) => c.key === 'deductions').fields);
 
-export default function AddPayslipForm({ onSave, onCancel, defaultYear, defaultMonth, initialData }) {
+export default function AddPayslipForm({ onSave, onCancel, defaultYear, defaultMonth, initialData, takenMonths = {} }) {
   const isEditing = !!initialData;
   const [year, setYear] = useState(initialData?.year ?? defaultYear ?? new Date().getFullYear());
   const [month, setMonth] = useState(initialData?.month ?? defaultMonth ?? 1);
@@ -53,7 +53,7 @@ export default function AddPayslipForm({ onSave, onCancel, defaultYear, defaultM
           ) : (
             <select value={month} onChange={(e) => setMonth(Number(e.target.value))}>
               {strings.months.map((name, i) => (
-                <option key={i + 1} value={i + 1}>
+                <option key={i + 1} value={i + 1} disabled={takenMonths[year]?.has(i + 1)}>
                   {name}
                 </option>
               ))}
