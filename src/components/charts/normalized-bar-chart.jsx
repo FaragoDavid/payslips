@@ -3,7 +3,7 @@ import { Chart, BarController, BarElement, CategoryScale, LinearScale, Tooltip }
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { Payslip } from '../../data/payslip.js';
 import { strings } from '../../i18n/strings.js';
-import { interpolateHexColor, labelColor, CATEGORY_COLORS, FIELD_COLOR_RANGES } from '../../utils/colors.js';
+import { labelColor, CATEGORY_COLORS, FIELD_COLORS } from '../../utils/colors.js';
 
 Chart.register(BarController, BarElement, CategoryScale, LinearScale, Tooltip);
 
@@ -32,15 +32,13 @@ function buildBarData(payslips, labels, shownCategories) {
 
   const fieldDatasets = [];
   for (const { key, fields } of chartCategories) {
-    const [colorStart, colorEnd] = FIELD_COLOR_RANGES[key];
     const activeFields = fields.filter((field) => payslips.some((payslip) => payslip[field]));
     activeFields.forEach((field) => {
       const values = payslips.map((payslip) => Math.abs(payslip[field] || 0));
-      const ratio = fields.length > 1 ? fields.indexOf(field) / (fields.length - 1) : 0.5;
       fieldDatasets.push({
         label: strings.fields[field],
         data: totals.map((total, i) => (total > 0 ? (values[i] / total) * 100 : 0)),
-        backgroundColor: interpolateHexColor(colorStart, colorEnd, ratio),
+        backgroundColor: FIELD_COLORS[field],
         categoryKey: key,
         stack: 'fields',
         barPercentage: 1,

@@ -36,6 +36,8 @@ for (const category of categories) {
   if (category.groups) category.fields = category.groups.flatMap((group) => group.fields);
 }
 
+export const STATIC_CATEGORY_FIELDS = Object.fromEntries(categories.map(({ key, fields }) => [key, [...fields]]));
+
 export class Payslip {
   constructor(data) {
     Object.assign(this, data);

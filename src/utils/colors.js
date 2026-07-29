@@ -1,3 +1,5 @@
+import { STATIC_CATEGORY_FIELDS } from '../data/payslip.js';
+
 const parseHex = (hex) => [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)];
 
 export function interpolateHexColor(hex1, hex2, ratio) {
@@ -25,6 +27,15 @@ export const FIELD_COLOR_RANGES = {
   deductions: ['#ef9a9a', '#b71c1c'],
   cafeteria: ['#ffcc80', '#e65100'],
 };
+
+export const FIELD_COLORS = Object.fromEntries(
+  Object.entries(FIELD_COLOR_RANGES)
+    .filter(([categoryKey]) => categoryKey in STATIC_CATEGORY_FIELDS)
+    .flatMap(([categoryKey, [start, end]]) => {
+      const fields = STATIC_CATEGORY_FIELDS[categoryKey];
+      return fields.map((field, i) => [field, interpolateHexColor(start, end, fields.length > 1 ? i / (fields.length - 1) : 0.5)]);
+    }),
+);
 
 export const NET_COLOR = '#2196f3';
 
