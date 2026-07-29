@@ -64,6 +64,18 @@ export default function Dashboard() {
     }
   }, [years, selectedYear]);
 
+  useEffect(() => {
+    if (!showForm && !editingPayslip) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setShowForm(false);
+        setEditingPayslip(null);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [showForm, editingPayslip]);
+
   const handleViewChange = (newView) => {
     setView(newView);
     localStorage.setItem(STORED_VIEW_KEY, newView);
