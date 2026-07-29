@@ -33,6 +33,10 @@ function buildBarData(payslips, labels, shownCategories) {
   const fieldDatasets = [];
   for (const { key, fields } of chartCategories) {
     const activeFields = fields.filter((field) => payslips.some((payslip) => payslip[field]));
+    const avgByField = Object.fromEntries(
+      activeFields.map((field) => [field, payslips.reduce((sum, p) => sum + Math.abs(p[field] || 0), 0) / payslips.length]),
+    );
+    activeFields.sort((a, b) => avgByField[b] - avgByField[a]);
     activeFields.forEach((field) => {
       const values = payslips.map((payslip) => Math.abs(payslip[field] || 0));
       fieldDatasets.push({
