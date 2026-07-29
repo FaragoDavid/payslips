@@ -86,13 +86,37 @@ export default function Dashboard() {
 
   const needsYearSelect = view === MONTHLY_TABLE || view === MONTHLY_NORM_BAR;
 
+  const getFormDefaults = () => {
+    for (let i = 0; i < payslips.length - 1; i++) {
+      const curr = payslips[i];
+      const next = payslips[i + 1];
+      const expectedNextMonth = curr.month === 12 ? 1 : curr.month + 1;
+      const expectedNextYear = curr.month === 12 ? curr.year + 1 : curr.year;
+      if (next.month !== expectedNextMonth || next.year !== expectedNextYear) {
+        return { defaultFormYear: expectedNextYear, defaultFormMonth: expectedNextMonth };
+      }
+    }
+    const last = payslips[payslips.length - 1];
+    return {
+      defaultFormYear: last.month === 12 ? last.year + 1 : last.year,
+      defaultFormMonth: last.month === 12 ? 1 : last.month + 1,
+    };
+  };
+
+  const { defaultFormYear, defaultFormMonth } = payslips ? getFormDefaults() : {};
+  const takenMonths = (payslips || []).reduce((acc, { year, month }) => {
+    if (!acc[year]) acc[year] = new Set();
+    acc[year].add(month);
+    return acc;
+  }, {});
+
   return (
     <div className="section">
       <DashboardHeader
         onAdd={() => setShowForm(true)}
         onRefresh={() => fetchData(true)}
         loading={loading}
-        addDisabled={showForm || !!editingPayslip}
+        addDisabled={showForm || !!editingPayslip || !payslips}
       />
       <div className="cards-container">
         <div className="card">
@@ -229,15 +253,9 @@ export default function Dashboard() {
                 setShowForm(false);
                 setEditingPayslip(null);
               }}
-              defaultYear={selectedYear}
-              defaultMonth={
-                Array.from({ length: 12 }, (_, i) => i + 1).find((m) => !payslipsOfSelectedYear.some((payslip) => payslip.month === m)) || 1
-              }
-              takenMonths={payslips.reduce((acc, { year, month }) => {
-                if (!acc[year]) acc[year] = new Set();
-                acc[year].add(month);
-                return acc;
-              }, {})}
+              defaultYear={defaultFormYear}
+              defaultMonth={defaultFormMonth}
+              takenMonths={takenMonths}
               initialData={editingPayslip || undefined}
             />
           </div>
