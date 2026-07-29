@@ -4,6 +4,7 @@ import { strings } from '../i18n/strings.js';
 import { formatInputValue, parseInputValue } from '../utils/format.js';
 
 const allFields = Payslip.categories.flatMap((c) => c.fields);
+const deductionFields = new Set(Payslip.categories.find((c) => c.key === 'deductions').fields);
 
 export default function AddPayslipForm({ onSave, onCancel, defaultYear, defaultMonth, initialData }) {
   const isEditing = !!initialData;
@@ -26,7 +27,10 @@ export default function AddPayslipForm({ onSave, onCancel, defaultYear, defaultM
     const data = { year, month };
     for (const key of allFields) {
       const val = parseFloat(parseInputValue(fields[key]));
-      if (!isNaN(val) && val !== 0) data[key] = val;
+      if (!isNaN(val) && val !== 0) {
+        if (deductionFields.has(key)) data[key] = -Math.abs(val);
+        else data[key] = Math.abs(val);
+      }
     }
     onSave(data);
   };
