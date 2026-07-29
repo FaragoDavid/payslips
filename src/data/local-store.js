@@ -1,5 +1,6 @@
 import { Payslip } from './payslip.js';
 import { CACHE_KEY } from './store.jsx';
+import mockPayslips from './mock-payslips.js';
 
 function read() {
   const raw = localStorage.getItem(CACHE_KEY);
@@ -12,12 +13,8 @@ function write(records) {
 
 export const localStore = {
   async readPayslips() {
-    if (import.meta.env.VITE_MOCK_PAYSLIPS) {
-      const records = JSON.parse(import.meta.env.VITE_MOCK_PAYSLIPS);
-      write(records);
-      return Payslip.hydrate(records);
-    }
-    return Payslip.hydrate(read());
+    write(mockPayslips);
+    return Payslip.hydrate(mockPayslips);
   },
 
   async addPayslip(data) {
