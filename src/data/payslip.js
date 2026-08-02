@@ -20,11 +20,15 @@ export class Payslip {
       .reduce((sum, { fields }) => sum + this.sum(fields), 0);
   }
 
-  static hydrate(records, categories, monetaryCategoryKeys) {
-    const categoriesWithFields = categories.map((category) => ({
+  static processCategories(categories) {
+    return categories.map((category) => ({
       ...category,
       fields: category.groups ? category.groups.flatMap((group) => group.fields) : [...category.fields],
     }));
+  }
+
+  static hydrate(records, categories, monetaryCategoryKeys) {
+    const categoriesWithFields = Payslip.processCategories(categories);
     const payslips = records.map((r) => new Payslip(r, categoriesWithFields, monetaryCategoryKeys));
     Payslip.updateSortIndices(payslips, categoriesWithFields);
     return payslips;

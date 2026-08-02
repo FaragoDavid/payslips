@@ -65,7 +65,8 @@ export default function Dashboard() {
     fetchData();
   }, [dataset]);
 
-  const yearlyPayslips = payslips ? Payslip.aggregateByYear(payslips, categories, monetaryCategoryKeys) : [];
+  const processedCategories = Payslip.processCategories(categories);
+  const yearlyPayslips = payslips ? Payslip.aggregateByYear(payslips, processedCategories, monetaryCategoryKeys) : [];
   const years = yearlyPayslips.map(({ year }) => year);
   const payslipsOfSelectedYear = payslips && selectedYear !== null ? payslips.filter(({ year }) => year === selectedYear) : [];
 
