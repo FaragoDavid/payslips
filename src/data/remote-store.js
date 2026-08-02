@@ -1,37 +1,38 @@
 import { Payslip } from './payslip.js';
-import { CACHE_KEY } from './store.jsx';
 import { fetchPayslipsFromFirestore, addPayslipToFirestore } from './firestore.js';
 
-function cacheRead() {
-  const raw = localStorage.getItem(CACHE_KEY);
-  return raw ? JSON.parse(raw) : null;
+export function createRemoteStore(collectionName, cacheKey, { categories, monetaryCategoryKeys }) {
+  function cacheRead() {
+    const raw = localStorage.getItem(cacheKey);
+    return raw ? JSON.parse(raw) : null;
+  }
+
+  function cacheWrite(records) {
+    localStorage.setItem(cacheKey, JSON.stringify(records));
+  }
+
+  return {
+    async readPayslips(forceRefresh = false) {
+      if (!forceRefresh) {
+        const cached = cacheRead();
+        if (cached && cached.length > 0) return Payslip.hydrate(cached, categories, monetaryCategoryKeys);
+      } else {
+        localStorage.removeItem(cacheKey);
+      }
+      const records = await fetchPayslipsFromFirestore(collectionName);
+      cacheWrite(records);
+      return Payslip.hydrate(records, categories, monetaryCategoryKeys);
+    },
+
+    async addPayslip(data) {
+      await addPayslipToFirestore(collectionName, data);
+      const records = cacheRead() ?? [];
+      const existingIndex = records.findIndex((p) => p.year === data.year && p.month === data.month);
+      if (existingIndex >= 0) records[existingIndex] = data;
+      else records.push(data);
+      cacheWrite(records);
+      const payslips = Payslip.hydrate(records, categories, monetaryCategoryKeys);
+      return payslips.find((p) => p.year === data.year && p.month === data.month);
+    },
+  };
 }
-
-function cacheWrite(records) {
-  localStorage.setItem(CACHE_KEY, JSON.stringify(records));
-}
-
-export const remoteStore = {
-  async readPayslips(forceRefresh = false) {
-    if (!forceRefresh) {
-      const cached = cacheRead();
-      if (cached && cached.length > 0) return Payslip.hydrate(cached);
-    } else {
-      localStorage.removeItem(CACHE_KEY);
-    }
-    const records = await fetchPayslipsFromFirestore();
-    cacheWrite(records);
-    return Payslip.hydrate(records);
-  },
-
-  async addPayslip(data) {
-    await addPayslipToFirestore(data);
-    const records = cacheRead() ?? [];
-    const idx = records.findIndex((p) => p.year === data.year && p.month === data.month);
-    if (idx >= 0) records[idx] = data;
-    else records.push(data);
-    cacheWrite(records);
-    const payslips = Payslip.hydrate(records);
-    return payslips.find((p) => p.year === data.year && p.month === data.month);
-  },
-};

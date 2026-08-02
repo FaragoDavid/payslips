@@ -1,6 +1,7 @@
 import { LOCALE } from '../utils/format.js';
+import { useDataset } from '../data/store.jsx';
 
-export const strings = {
+const shared = {
   title: 'Munkabér',
   months: Array.from({ length: 12 }, (_unused, monthIndex) => new Date(2000, monthIndex, 1).toLocaleString(LOCALE, { month: 'short' })),
   dashboard: {
@@ -22,6 +23,20 @@ export const strings = {
   table: {
     net: 'Nettó',
   },
+  addForm: {
+    addButton: 'Hozzáadás',
+    year: 'Év',
+    month: 'Hónap',
+    save: 'Mentés',
+    cancel: 'Mégse',
+  },
+  dataset: {
+    david: 'Dávid',
+    niki: 'Niki',
+  },
+};
+
+const davidStrings = {
   fields: {
     base_salary: 'Besorolási bér',
     absence_pay: 'Távolléti díj',
@@ -56,11 +71,41 @@ export const strings = {
     cafeteria: 'Cafeteria',
     workTime: 'Munkaidő',
   },
-  addForm: {
-    addButton: 'Hozzáadás',
-    year: 'Év',
-    month: 'Hónap',
-    save: 'Mentés',
-    cancel: 'Mégse',
+};
+
+const nikiStrings = {
+  fields: {
+    monthly_basic_pay: 'Havi alapbér',
+    afternoon_shift_bonus: 'Délutáni műszakpótlék 30%',
+    weekend_allowance: 'Hétvégi pótlék 50%',
+    benefit_gross_up: 'Juttatás bruttósítás',
+    other_wage: 'Egyéb munkabér',
+    paid_public_holiday: 'Fizetett ünnepnap',
+    vacation: 'Szabadság',
+    overtime_basis: 'Túlóra alap',
+    balance_overtime: 'Egyenleg túlóra 50%',
+    paid_full_day_absence: 'Fizetett egésznapos távollét',
+    foreign_exchange_all: 'Deviza juttatás',
+    szja: 'SZJA',
+    tb_hozzajarulas: 'TB hozzájárulás',
+    employees_discount: 'Dolgozói kedvezmény',
+    meal_contribution: 'Étkezési hozzájárulás',
+    gift_card: 'Ajándékkártya',
+    work_days: 'Munkanap',
+    calendar_days: 'Naptári nap',
+    work_hours: 'Munkaóra',
+  },
+  groups: {},
+  categories: {
+    income: 'Bevétel',
+    deductions: 'Levonások',
+    memoItems: 'Tájékoztató tételek',
+    workTime: 'Munkaidő',
   },
 };
+
+export function useStrings() {
+  const { dataset } = useDataset();
+  const { fields, groups, categories } = dataset === 'niki' ? nikiStrings : davidStrings;
+  return { ...shared, fields, groups, categories };
+}

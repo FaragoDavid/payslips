@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { Chart, BarController, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-import { strings } from '../../i18n/strings.js';
+import { useStrings } from '../../i18n/strings.js';
 import { formatCurrency } from '../../utils/format.js';
 import { NET_COLOR, CATEGORY_COLORS } from '../../utils/colors.js';
 
@@ -10,7 +10,7 @@ Chart.register(BarController, BarElement, CategoryScale, LinearScale, Tooltip, L
 const BAR_BORDER_RADIUS = 3;
 const DATALABEL_FONT_SIZE = 12;
 
-function buildBarData(yearlyPayslips) {
+function buildBarData(yearlyPayslips, strings) {
   return {
     labels: yearlyPayslips.map((p) => String(p.year)),
     datasets: [
@@ -33,13 +33,14 @@ function buildBarData(yearlyPayslips) {
 }
 
 export default function YearlyBarChart({ yearlyPayslips }) {
+  const strings = useStrings();
   const canvasRef = useRef(null);
   const chartRef = useRef(null);
 
   useEffect(() => {
     if (!canvasRef.current || yearlyPayslips.length === 0) return;
 
-    const chartData = buildBarData(yearlyPayslips);
+    const chartData = buildBarData(yearlyPayslips, strings);
 
     if (chartRef.current) {
       chartRef.current.data = chartData;

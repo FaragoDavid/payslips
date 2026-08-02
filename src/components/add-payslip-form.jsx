@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
-import { Payslip } from '../data/payslip.js';
-import { strings } from '../i18n/strings.js';
+import { useCategories } from '../data/categories.js';
+import { useStrings } from '../i18n/strings.js';
 import { formatInputValue, parseInputValue } from '../utils/format.js';
 
-const allFields = Payslip.categories.flatMap((c) => c.fields);
-const deductionFields = new Set(Payslip.categories.find((c) => c.key === 'deductions').fields);
-
 export default function AddPayslipForm({ onSave, onCancel, defaultYear, defaultMonth, initialData, takenMonths = {} }) {
+  const strings = useStrings();
+  const categories = useCategories();
   const isEditing = !!initialData;
+
+  const allFields = categories.flatMap(({ fields }) => fields);
+  const deductionFields = new Set(categories.find(({ key }) => key === 'deductions').fields);
+
   const [year, setYear] = useState(initialData?.year ?? defaultYear ?? new Date().getFullYear());
   const [month, setMonth] = useState(initialData?.month ?? defaultMonth ?? 1);
   const [fields, setFields] = useState(() =>
@@ -60,7 +63,7 @@ export default function AddPayslipForm({ onSave, onCancel, defaultYear, defaultM
             </select>
           )}
         </div>
-        {Payslip.categories.map((category) => (
+        {categories.map((category) => (
           <fieldset key={category.key}>
             <legend>{strings.categories[category.key]}</legend>
             {category.groups

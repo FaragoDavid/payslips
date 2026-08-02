@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { Payslip } from '../data/payslip.js';
-import { useStore } from '../data/store.jsx';
-import { strings } from '../i18n/strings.js';
+import { useCategories, useMonetaryCategoryKeys } from '../data/categories.js';
+import { useDataset, useStore } from '../data/store.jsx';
+import { useStrings } from '../i18n/strings.js';
 import AddPayslipForm from './add-payslip-form.jsx';
 import HourlyRateTrendChart from './charts/hourly-rate-trend-chart.jsx';
 import MonthlyTrendChart from './charts/monthly-trend-chart.jsx';
@@ -25,6 +26,10 @@ const STANDBY_HOURLY_RATE = 'standby-hourly-rate';
 
 export default function Dashboard() {
   const store = useStore();
+  const { dataset } = useDataset();
+  const strings = useStrings();
+  const categories = useCategories();
+  const monetaryCategoryKeys = useMonetaryCategoryKeys();
   const [payslips, setPayslips] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -36,25 +41,31 @@ export default function Dashboard() {
   const [showForm, setShowForm] = useState(false);
   const [editingPayslip, setEditingPayslip] = useState(null);
 
-  const fetchData = useCallback(async (forceRefresh = false) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const payslips = await store.readPayslips(forceRefresh);
-      setPayslips(payslips || []);
-    } catch (err) {
-      console.error('Error loading payslip data:', err);
-      setError(strings.dashboard.errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const fetchData = useCallback(
+    async (forceRefresh = false) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const payslips = await store.readPayslips(forceRefresh);
+        setPayslips(payslips || []);
+      } catch (err) {
+        console.error('Error loading payslip data:', err);
+        setError(strings.dashboard.errorMessage);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [store],
+  );
 
   useEffect(() => {
+    setPayslips(null);
+    setShowForm(false);
+    setEditingPayslip(null);
     fetchData();
-  }, [fetchData]);
+  }, [dataset]);
 
-  const yearlyPayslips = payslips ? Payslip.aggregateByYear(payslips) : [];
+  const yearlyPayslips = payslips ? Payslip.aggregateByYear(payslips, categories, monetaryCategoryKeys) : [];
   const years = yearlyPayslips.map(({ year }) => year);
   const payslipsOfSelectedYear = payslips && selectedYear !== null ? payslips.filter(({ year }) => year === selectedYear) : [];
 

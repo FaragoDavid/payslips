@@ -1,10 +1,13 @@
 import React from 'react';
 import { Pencil } from 'lucide-react';
-import { strings } from '../../i18n/strings.js';
-import { Payslip } from '../../data/payslip.js';
+import { useCategories, useMonetaryCategoryKeys } from '../../data/categories.js';
+import { useStrings } from '../../i18n/strings.js';
 import Row from './row.jsx';
 
 export default function PayslipTable({ payslips, columns, headers, columnKey, showTotal, onEditColumn }) {
+  const strings = useStrings();
+  const categories = useCategories();
+  const monetaryCategoryKeys = useMonetaryCategoryKeys();
   const columnsWithData = onEditColumn ? new Set(payslips.map((payslip) => payslip[columnKey])) : null;
 
   return (
@@ -33,9 +36,9 @@ export default function PayslipTable({ payslips, columns, headers, columnKey, sh
           columns={columns}
           showTotal={showTotal}
         />
-        {Payslip.categories.flatMap(({ key, fields, groups }) => {
+        {categories.flatMap(({ key, fields, groups }) => {
           const activeFields = fields.filter((field) => payslips.some((payslip) => payslip[field]));
-          const isMonetary = Payslip.monetaryCategories.includes(key);
+          const isMonetary = monetaryCategoryKeys.includes(key);
           return [
             isMonetary ? (
               <Row

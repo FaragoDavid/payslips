@@ -33,10 +33,6 @@ body {
   transition: opacity 0.3s ease-in-out;
 }
 
-.section.hidden {
-  display: none;
-}
-
 h1 {
   color: #333;
   margin-bottom: 16px;
@@ -66,7 +62,7 @@ p {
 
 .btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(30, 107, 78, 0.4);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .btn:active {
@@ -114,13 +110,18 @@ p {
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   margin-bottom: 20px;
   text-align: left;
 }
 
 .header h1 {
-  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 28px;
+  line-height: 32px;
   color: white;
 }
 
@@ -131,7 +132,7 @@ p {
 }
 
 .btn-small {
-  padding: 8px 16px;
+  padding: 6px 16px;
   font-size: 14px;
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.2);
@@ -151,6 +152,29 @@ p {
   background: rgba(67, 160, 71, 0.8);
 }
 
+.dataset-toggle {
+  display: flex;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.dataset-toggle .btn-small {
+  border-radius: 0;
+  border: none;
+  border-right: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.dataset-toggle .btn-small:last-child {
+  border-right: none;
+}
+
+.dataset-toggle .btn-small.active {
+  background: rgba(67, 160, 71, 0.6);
+  border-color: rgba(67, 160, 71, 0.8);
+  font-weight: 600;
+}
+
 .view-select {
   display: none;
   padding: 8px 12px;
@@ -165,7 +189,6 @@ p {
 
 .view-toggle {
   display: flex;
-  gap: 0;
 }
 
 .btn-icon {
@@ -212,10 +235,6 @@ p {
   color: white;
 }
 
-.view-panel.hidden {
-  display: none;
-}
-
 .card h2 {
   font-size: 20px;
   color: #333;
@@ -234,42 +253,6 @@ p {
 
 .card-header h2 {
   margin-bottom: 0;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.stat-box {
-  background: #f8f9fa;
-  border-radius: 12px;
-  padding: 16px;
-  text-align: center;
-}
-
-.stat-box .label {
-  font-size: 12px;
-  color: #666;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 4px;
-}
-
-.stat-box .value {
-  font-size: 22px;
-  font-weight: 700;
-  color: #333;
-}
-
-.stat-box .value.positive {
-  color: #2e7d32;
-}
-
-.stat-box .value.negative {
-  color: #c62828;
 }
 
 .negative {
@@ -344,7 +327,7 @@ tbody tr:hover td {
 .row-category td {
   font-weight: 700;
   background: #e8eaf6;
-  border-top: 2px solid #9fa8da;
+  border-top: 2px solid #2d3561;
 }
 
 .row-group td {
@@ -487,10 +470,6 @@ td.col-total {
   .header {
     align-items: center;
   }
-
-  .stats-grid {
-    grid-template-columns: 1fr 1fr;
-  }
 }
 
 .add-payslip-form {
@@ -584,6 +563,7 @@ td.col-total {
   color: white;
 }
 
-.btn-cancel {
+.form-actions .btn-small.btn-cancel {
   background: #888;
+  border-color: transparent;
 }

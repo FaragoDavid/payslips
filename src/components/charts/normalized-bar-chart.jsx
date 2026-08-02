@@ -1,17 +1,17 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Chart, BarController, BarElement, CategoryScale, LinearScale, Tooltip } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-import { Payslip } from '../../data/payslip.js';
-import { strings } from '../../i18n/strings.js';
+import { useCategories, useMonetaryCategoryKeys } from '../../data/categories.js';
+import { useStrings } from '../../i18n/strings.js';
 import { labelColor, CATEGORY_COLORS, FIELD_COLORS } from '../../utils/colors.js';
 
 Chart.register(BarController, BarElement, CategoryScale, LinearScale, Tooltip);
 
 const DATALABEL_FONT_SIZE = 11;
 const MIN_LABEL_PERCENTAGE = 5;
-const chartCategories = Payslip.categories.filter(({ key }) => Payslip.monetaryCategories.includes(key));
+const STORED_CATEGORIES_KEY = 'payslips_shown_categories';
 
-function buildBarData(payslips, labels, shownCategories, highlightedFieldRef) {
+function buildBarData(payslips, labels, chartCategories, shownCategories, highlightedFieldRef, strings) {
   const visibleCategories = chartCategories.filter(({ key }) => shownCategories.includes(key));
   const categoryValues = chartCategories.map(({ key }) => payslips.map((payslip) => Math.abs(payslip.sumCategory(key))));
   const totals = payslips.map((_, i) =>
@@ -47,6 +47,7 @@ function buildBarData(payslips, labels, shownCategories, highlightedFieldRef) {
           return highlighted && highlighted !== field ? FIELD_COLORS[field] + '33' : FIELD_COLORS[field];
         },
         categoryKey: key,
+        fieldKey: field,
         stack: 'fields',
         barPercentage: 1,
         hidden: !shownCategories.includes(key),
@@ -57,9 +58,12 @@ function buildBarData(payslips, labels, shownCategories, highlightedFieldRef) {
   return { labels, datasets: [...categoryDatasets, ...fieldDatasets] };
 }
 
-const STORED_CATEGORIES_KEY = 'payslips_shown_categories';
-
 export default function NormalizedBarChart({ payslips, labels }) {
+  const strings = useStrings();
+  const categories = useCategories();
+  const monetaryCategoryKeys = useMonetaryCategoryKeys();
+  const chartCategories = categories.filter(({ key }) => monetaryCategoryKeys.includes(key));
+
   const canvasRef = useRef(null);
   const chartRef = useRef(null);
   const highlightedFieldRef = useRef(null);
@@ -92,7 +96,7 @@ export default function NormalizedBarChart({ payslips, labels }) {
   useEffect(() => {
     if (!canvasRef.current || payslips.length === 0) return;
 
-    const chartData = buildBarData(payslips, labels, shownCategories, highlightedFieldRef);
+    const chartData = buildBarData(payslips, labels, chartCategories, shownCategories, highlightedFieldRef, strings);
 
     if (chartRef.current) {
       chartRef.current.data = chartData;
@@ -120,10 +124,7 @@ export default function NormalizedBarChart({ payslips, labels }) {
             align: 'center',
             font: { size: DATALABEL_FONT_SIZE, weight: 'bold' },
             color: (context) =>
-              labelColor(
-                FIELD_COLORS[Object.keys(strings.fields).find((f) => strings.fields[f] === context.dataset.label)] ||
-                  context.dataset.backgroundColor,
-              ),
+              labelColor(context.dataset.fieldKey ? FIELD_COLORS[context.dataset.fieldKey] : CATEGORY_COLORS[context.dataset.categoryKey]),
             display: (context) => context.dataset.data[context.dataIndex] >= MIN_LABEL_PERCENTAGE,
             formatter: (value) => value.toFixed(0) + '%',
           },

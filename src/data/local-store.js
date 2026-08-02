@@ -1,29 +1,20 @@
 import { Payslip } from './payslip.js';
-import { CACHE_KEY } from './store.jsx';
-import mockPayslips from './mock-payslips.js';
 
-function read() {
-  const raw = localStorage.getItem(CACHE_KEY);
-  return raw ? JSON.parse(raw) : [];
+export function createLocalStore(mockData, cacheKey, { categories, monetaryCategoryKeys }) {
+  return {
+    async readPayslips() {
+      localStorage.setItem(cacheKey, JSON.stringify(mockData));
+      return Payslip.hydrate(mockData, categories, monetaryCategoryKeys);
+    },
+
+    async addPayslip(data) {
+      const records = JSON.parse(localStorage.getItem(cacheKey));
+      const existingIndex = records.findIndex(({ year, month }) => year === data.year && month === data.month);
+      if (existingIndex >= 0) records[existingIndex] = data;
+      else records.push(data);
+      localStorage.setItem(cacheKey, JSON.stringify(records));
+      const payslips = Payslip.hydrate(records, categories, monetaryCategoryKeys);
+      return payslips.find((p) => p.year === data.year && p.month === data.month);
+    },
+  };
 }
-
-function write(records) {
-  localStorage.setItem(CACHE_KEY, JSON.stringify(records));
-}
-
-export const localStore = {
-  async readPayslips() {
-    write(mockPayslips);
-    return Payslip.hydrate(mockPayslips);
-  },
-
-  async addPayslip(data) {
-    const records = read();
-    const idx = records.findIndex((p) => p.year === data.year && p.month === data.month);
-    if (idx >= 0) records[idx] = data;
-    else records.push(data);
-    write(records);
-    const payslips = Payslip.hydrate(records);
-    return payslips.find((p) => p.year === data.year && p.month === data.month);
-  },
-};

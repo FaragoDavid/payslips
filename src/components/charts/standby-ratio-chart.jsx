@@ -1,12 +1,12 @@
 import React, { useRef, useEffect } from 'react';
 import { Chart, LineController, LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js';
-import { strings } from '../../i18n/strings.js';
+import { useStrings } from '../../i18n/strings.js';
 import { formatHourlyRate } from '../../utils/format.js';
 import { yearColor } from '../../utils/colors.js';
 
 Chart.register(LineController, LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend);
 
-function buildLineData(payslips) {
+function buildLineData(payslips, strings) {
   const years = [...new Set(payslips.map(({ year }) => year))].sort();
 
   const datasets = years.map((year, index) => {
@@ -33,13 +33,14 @@ function buildLineData(payslips) {
 }
 
 export default function StandbyRatioChart({ payslips }) {
+  const strings = useStrings();
   const canvasRef = useRef(null);
   const chartRef = useRef(null);
 
   useEffect(() => {
     if (!canvasRef.current || payslips.length === 0) return;
 
-    const chartData = buildLineData(payslips);
+    const chartData = buildLineData(payslips, strings);
 
     if (chartRef.current) {
       chartRef.current.data = chartData;
