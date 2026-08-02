@@ -28,6 +28,7 @@ export class Payslip {
   }
 
   static hydrate(records, categories, monetaryCategoryKeys) {
+    console.log('hydrate categories:', JSON.stringify(categories));
     const categoriesWithFields = Payslip.processCategories(categories);
     const payslips = records.map((r) => new Payslip(r, categoriesWithFields, monetaryCategoryKeys));
     Payslip.updateSortIndices(payslips, categoriesWithFields);
