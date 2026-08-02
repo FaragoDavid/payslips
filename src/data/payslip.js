@@ -20,23 +20,13 @@ export class Payslip {
       .reduce((sum, { fields }) => sum + this.sum(fields), 0);
   }
 
-  static processCategories(categories) {
-    return categories.map((category) => ({
-      ...category,
-      fields: category.groups ? category.groups.flatMap((group) => group.fields) : [...category.fields],
-    }));
-  }
-
   static hydrate(records, categories, monetaryCategoryKeys) {
-    console.log('hydrate categories:', JSON.stringify(categories));
-    const categoriesWithFields = Payslip.processCategories(categories);
-    const payslips = records.map((r) => new Payslip(r, categoriesWithFields, monetaryCategoryKeys));
-    Payslip.updateSortIndices(payslips, categoriesWithFields);
+    const payslips = records.map((r) => new Payslip(r, categories, monetaryCategoryKeys));
+    Payslip.updateSortIndices(payslips, categories);
     return payslips;
   }
 
   static updateSortIndices(payslips, categories) {
-    console.log('updateSortIndices categories:', JSON.stringify(categories));
     function sortFields(fields) {
       const counts = Object.fromEntries(fields.map((field) => [field, 0]));
       for (const payslip of payslips) {
@@ -47,12 +37,7 @@ export class Payslip {
       fields.sort((fieldA, fieldB) => counts[fieldB] - counts[fieldA]);
     }
     for (const category of categories) {
-      if (category.groups) {
-        for (const group of category.groups) sortFields(group.fields);
-        category.fields = category.groups.flatMap((group) => group.fields);
-      } else {
-        sortFields(category.fields);
-      }
+      sortFields(category.fields);
     }
   }
 

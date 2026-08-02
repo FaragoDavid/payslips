@@ -73,9 +73,16 @@ export const nikiConfig = {
 
 const configs = { david: davidConfig, niki: nikiConfig };
 
+export function processCategories(categories) {
+  return categories.map((category) => ({
+    ...category,
+    fields: category.groups ? category.groups.flatMap(({ fields }) => fields) : [...category.fields],
+  }));
+}
+
 export function useCategories() {
   const { dataset } = useDataset();
-  return configs[dataset].categories;
+  return processCategories(configs[dataset].categories);
 }
 
 export function useMonetaryCategoryKeys() {
