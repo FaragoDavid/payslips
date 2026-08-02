@@ -36,6 +36,7 @@ export class Payslip {
   }
 
   static updateSortIndices(payslips, categories) {
+    console.log('updateSortIndices categories:', JSON.stringify(categories));
     function sortFields(fields) {
       const counts = Object.fromEntries(fields.map((field) => [field, 0]));
       for (const payslip of payslips) {
