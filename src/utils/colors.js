@@ -1,17 +1,3 @@
-import { davidConfig, nikiConfig } from '../data/categories.js';
-
-const parseHex = (hex) => [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)];
-
-export function interpolateHexColor(hex1, hex2, ratio) {
-  const [r1, g1, b1] = parseHex(hex1);
-  const [r2, g2, b2] = parseHex(hex2);
-  const lerp = (a, b) =>
-    Math.round(a + (b - a) * ratio)
-      .toString(16)
-      .padStart(2, '0');
-  return `#${lerp(r1, r2)}${lerp(g1, g2)}${lerp(b1, b2)}`;
-}
-
 export function labelColor(bgHex) {
   const r = parseInt(bgHex.slice(1, 3), 16);
   const g = parseInt(bgHex.slice(3, 5), 16);
@@ -26,27 +12,43 @@ export const CATEGORY_COLORS = {
   memoItems: '#9c27b0',
 };
 
-const FIELD_COLOR_RANGES = {
-  income: ['#81c784', '#2e7d32'],
-  deductions: ['#ef9a9a', '#b71c1c'],
-  cafeteria: ['#ffcc80', '#e65100'],
-  memoItems: ['#ce93d8', '#6a1b9a'],
-};
-
-const seen = new Set();
-export const FIELD_COLORS = Object.fromEntries(
-  [davidConfig, nikiConfig]
-    .flatMap(({ categories }) => categories)
-    .filter(({ key }) => key in FIELD_COLOR_RANGES)
-    .flatMap(({ key, fields }) => {
-      const [start, end] = FIELD_COLOR_RANGES[key];
-      return fields
-        .filter((field) => !seen.has(field) && seen.add(field))
-        .map((field, i) => [field, interpolateHexColor(start, end, fields.length > 1 ? i / (fields.length - 1) : 0.5)]);
-    }),
-);
-
 export const NET_COLOR = '#2196f3';
+
+export const FIELD_COLORS = {
+  base_salary: '#81c784',
+  absence_pay: '#79c07d',
+  absence_pay_base: '#72ba75',
+  visp_bonus: '#6ab36e',
+  rsu_bonus: '#63ac66',
+  car_allowance: '#5ba55f',
+  standby_supplement: '#549f57',
+  standby_supplement_correction: '#4c9850',
+  cafeteria_cash: '#459148',
+  commute_cost: '#3d8a41',
+  in_kind_pay: '#368439',
+  safety_glasses: '#2e7d32',
+  szep_card_accommodation: '#f38f40',
+  tax_advance: '#ef9a9a',
+  other_deductions: '#dc7070',
+  social_security: '#ca4646',
+  in_kind_pay_net: '#b71c1c',
+  monthly_basic_pay: '#81c784',
+  afternoon_shift_bonus: '#79c07c',
+  weekend_allowance: '#70b874',
+  benefit_gross_up: '#68b16b',
+  other_wage: '#60a963',
+  paid_public_holiday: '#58a25b',
+  vacation: '#4f9b53',
+  overtime_basis: '#47934b',
+  balance_overtime: '#3f8c42',
+  paid_full_day_absence: '#36843a',
+  foreign_exchange_all: '#2e7d32',
+  szja: '#ef9a9a',
+  tb_hozzajarulas: '#b71c1c',
+  employees_discount: '#ce93d8',
+  meal_contribution: '#9c57b9',
+  gift_card: '#6a1b9a',
+};
 
 export function yearColor(index, count) {
   const lightness = count > 1 ? 80 - (index / (count - 1)) * 45 : 35;
