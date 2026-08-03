@@ -126,7 +126,7 @@ export default function Dashboard() {
     };
   };
 
-  const { defaultFormYear, defaultFormMonth } = payslips ? getFormDefaults() : {};
+  const { defaultFormYear, defaultFormMonth } = payslips?.length ? getFormDefaults() : {};
   const takenMonths = (payslips || []).reduce((acc, { year, month }) => {
     if (!acc[year]) acc[year] = new Set();
     acc[year].add(month);
