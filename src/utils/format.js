@@ -25,7 +25,7 @@ export function formatCell(value, negative) {
 }
 
 export function formatInputValue(raw) {
-  const num = parseInt(raw, 10);
+  const num = Number(String(raw).replace(/\s/g, ''));
   return raw === '' || isNaN(num) ? raw : num.toLocaleString(LOCALE);
 }
 
