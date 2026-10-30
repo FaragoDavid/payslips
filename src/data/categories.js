@@ -5,15 +5,15 @@ export const davidConfig = {
     {
       key: 'income',
       groups: [
-        { key: 'basePay', fields: ['base_salary', 'absence_pay', 'absence_pay_base'] },
+        { key: 'basePay', fields: ['monthly_salary', 'absence_pay', 'absence_pay_base'] },
         { key: 'bonus', fields: ['visp_bonus', 'rsu_bonus'] },
         {
           key: 'benefits',
           fields: [
-            'car_allowance',
-            'standby_supplement',
+            'extra_task_by_phone',
+            'car_compensation',
+            'cash_benefit',
             'standby_supplement_correction',
-            'cafeteria_cash',
             'commute_cost',
             'in_kind_pay',
             'safety_glasses',
@@ -23,11 +23,11 @@ export const davidConfig = {
     },
     {
       key: 'cafeteria',
-      fields: ['szep_card_accommodation'],
+      fields: ['szep_card', 'health_service', 'safety_net_program'],
     },
     {
       key: 'deductions',
-      fields: ['tax_advance', 'other_deductions', 'social_security', 'in_kind_pay_net'],
+      fields: ['tax_advance', 'tb_charge', 'other_deductions', 'in_kind_pay_net'],
     },
     {
       key: 'workTime',
@@ -35,6 +35,14 @@ export const davidConfig = {
     },
   ],
   monetaryCategoryKeys: ['income', 'cafeteria', 'deductions'],
+  fieldAliases: {
+    monthly_salary: 'base_salary',
+    car_compensation: 'car_allowance',
+    cash_benefit: 'cafeteria_cash',
+    szep_card: 'szep_card_accommodation',
+    extra_task_by_phone: 'standby_supplement',
+    tb_charge: 'social_security',
+  },
 };
 
 export const nikiConfig = {

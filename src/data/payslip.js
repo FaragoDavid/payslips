@@ -20,8 +20,19 @@ export class Payslip {
       .reduce((sum, { fields }) => sum + this.sum(fields), 0);
   }
 
-  static hydrate(records, categories, monetaryCategoryKeys) {
-    const payslips = records.map((r) => new Payslip(r, categories, monetaryCategoryKeys));
+  static normalize(data, fieldAliases) {
+    const normalized = { ...data };
+    for (const [newKey, oldKey] of Object.entries(fieldAliases)) {
+      if (normalized[newKey] === undefined && normalized[oldKey] !== undefined) {
+        normalized[newKey] = normalized[oldKey];
+        delete normalized[oldKey];
+      }
+    }
+    return normalized;
+  }
+
+  static hydrate(records, categories, monetaryCategoryKeys, fieldAliases = {}) {
+    const payslips = records.map((r) => new Payslip(Payslip.normalize(r, fieldAliases), categories, monetaryCategoryKeys));
     Payslip.updateSortIndices(payslips, categories);
     return payslips;
   }

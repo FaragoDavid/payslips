@@ -2,7 +2,7 @@ import { Payslip } from './payslip.js';
 import { processCategories } from './categories.js';
 import { fetchPayslipsFromFirestore, addPayslipToFirestore } from './firestore.js';
 
-export function createRemoteStore(collectionName, cacheKey, { categories, monetaryCategoryKeys }) {
+export function createRemoteStore(collectionName, cacheKey, { categories, monetaryCategoryKeys, fieldAliases = {} }) {
   const processedCategories = processCategories(categories);
 
   function cacheRead() {
@@ -18,13 +18,13 @@ export function createRemoteStore(collectionName, cacheKey, { categories, moneta
     async readPayslips(forceRefresh = false) {
       if (!forceRefresh) {
         const cached = cacheRead();
-        if (cached && cached.length > 0) return Payslip.hydrate(cached, processedCategories, monetaryCategoryKeys);
+        if (cached && cached.length > 0) return Payslip.hydrate(cached, processedCategories, monetaryCategoryKeys, fieldAliases);
       } else {
         localStorage.removeItem(cacheKey);
       }
       const records = await fetchPayslipsFromFirestore(collectionName);
       cacheWrite(records);
-      return Payslip.hydrate(records, processedCategories, monetaryCategoryKeys);
+      return Payslip.hydrate(records, processedCategories, monetaryCategoryKeys, fieldAliases);
     },
 
     async addPayslip(data) {
@@ -34,7 +34,7 @@ export function createRemoteStore(collectionName, cacheKey, { categories, moneta
       if (existingIndex >= 0) records[existingIndex] = data;
       else records.push(data);
       cacheWrite(records);
-      const payslips = Payslip.hydrate(records, processedCategories, monetaryCategoryKeys);
+      const payslips = Payslip.hydrate(records, processedCategories, monetaryCategoryKeys, fieldAliases);
       return payslips.find((p) => p.year === data.year && p.month === data.month);
     },
   };

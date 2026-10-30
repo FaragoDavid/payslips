@@ -1,12 +1,12 @@
 import { Payslip } from './payslip.js';
 import { processCategories } from './categories.js';
 
-export function createLocalStore(mockData, cacheKey, { categories, monetaryCategoryKeys }) {
+export function createLocalStore(mockData, cacheKey, { categories, monetaryCategoryKeys, fieldAliases = {} }) {
   const processedCategories = processCategories(categories);
   return {
     async readPayslips() {
       localStorage.setItem(cacheKey, JSON.stringify(mockData));
-      return Payslip.hydrate(mockData, processedCategories, monetaryCategoryKeys);
+      return Payslip.hydrate(mockData, processedCategories, monetaryCategoryKeys, fieldAliases);
     },
 
     async addPayslip(data) {
@@ -15,7 +15,7 @@ export function createLocalStore(mockData, cacheKey, { categories, monetaryCateg
       if (existingIndex >= 0) records[existingIndex] = data;
       else records.push(data);
       localStorage.setItem(cacheKey, JSON.stringify(records));
-      const payslips = Payslip.hydrate(records, processedCategories, monetaryCategoryKeys);
+      const payslips = Payslip.hydrate(records, processedCategories, monetaryCategoryKeys, fieldAliases);
       return payslips.find((p) => p.year === data.year && p.month === data.month);
     },
   };
